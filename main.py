@@ -2,6 +2,9 @@
 Simulate a map with ants. 
 """ 
 import os 
+import sys 
+# Insert the src directory in the system path 
+sys.path.append("src") 
 from Map import Map 
 
 def main(): 
