@@ -74,7 +74,8 @@ class Tile(object):
             volume = self.map.foods[(self.x_pos, self.y_pos)].volume 
             msg = "F,{volume},{ants}".format(volume=volume, ants=ants) 
         else: 
-            msg = "{ants}".format(ants=ants) 
+            pher_volume = len(self.pheromones) 
+            msg = "{pher},{ants}".format(ants=ants, pher=pher_volume) 
 
         # Compute the message's length 
         msg_length = len(msg) + 2 # we use `2` for the bars, | 

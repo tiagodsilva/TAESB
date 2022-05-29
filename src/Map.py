@@ -32,6 +32,7 @@ class Map(object):
             foods: List[Tuple[int, int, int]], # x, y, initial_volume  
             food_update: int, # x, y 
             ants_fov: int, 
+            pheromones_lifetime: int, 
             verbose: bool = False): 
         """ 
         Constructor method for a map with width `width` and height `height`. 
@@ -51,6 +52,9 @@ class Map(object):
         self.ants_fov = ants_fov 
         self.ants = list() 
         self.initialize_ants(anthills) 
+        
+        # Pheromones (which die periodically) life time 
+        self.pheromones_lifetime = pheromones_lifetime 
 
         # A flag for the current iteration 
         self.iteration = 0 
@@ -233,4 +237,12 @@ class Map(object):
         x_direction, y_direction = neighbors[direction_index] 
         x_direction, y_direction = x_direction - x_pos, y_direction - y_pos 
         return x_direction, y_direction 
+
+    def release_pheromone(self, x_pos: int, y_pos: int): 
+        """ 
+        Release a pheromone at the tile in (`x_pos`, `y_pos`). 
+        """ 
+        self.tiles[x_pos][y_pos].increment_pheromone( 
+                self.iteration, self.pheromones_lifetime 
+        ) 
 
