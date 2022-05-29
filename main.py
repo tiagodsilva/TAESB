@@ -16,7 +16,7 @@ def main():
     height = 9 
     anthills = [("Spartans", 1, 3, 15), ("Jedi", 5, 5, 99)] 
     foods = [(1, 5, 9)] 
-    food_update = 15 
+    food_update = 3 
     ants_fov = 1 
     verbose = True 
     

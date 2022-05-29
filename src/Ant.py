@@ -125,6 +125,7 @@ class Ant(object):
         """ 
         # Check if the ant has food and should move to the colony 
         if self.has_food: 
+            self.release_pheromone()  
             self.move_colony() 
             return 
          

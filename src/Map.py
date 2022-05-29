@@ -24,6 +24,7 @@ class Map(object):
     iteration: int 
     verbose: bool 
     food_update: int 
+    pheromones_lifetime: int 
 
     def __init__(self, 
             width: int, 
@@ -242,7 +243,7 @@ class Map(object):
         """ 
         Release a pheromone at the tile in (`x_pos`, `y_pos`). 
         """ 
-        self.tiles[x_pos][y_pos].increment_pheromone( 
+        self.tiles[x_pos][y_pos].increment_pheromones( 
                 self.iteration, self.pheromones_lifetime 
         ) 
 
