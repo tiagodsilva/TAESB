@@ -72,7 +72,7 @@ class Tile(object):
         elif self.is_food: 
             # Compute the volume of the food 
             volume = self.map.foods[(self.x_pos, self.y_pos)].volume 
-            msg = "F,{volume},{ants}".format(volume=volume, ants=ants) 
+            msg = "F,{volume}".format(volume=volume) 
         else: 
             pher_volume = len(self.pheromones) 
             msg = "{pher},{ants}".format(ants=ants, pher=pher_volume) 
