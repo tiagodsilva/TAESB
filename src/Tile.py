@@ -60,7 +60,7 @@ class Tile(object):
             if kill: 
                 self.pheromones.pop(i) 
 
-    def print(self, length: int = 9) -> str: 
+    def print(self, length: int = 12) -> str: 
         """ 
         Print the tile's attributes and returns a string; the messages have length `length`. 
         """ 
