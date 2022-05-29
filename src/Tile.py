@@ -60,18 +60,31 @@ class Tile(object):
             if kill: 
                 self.pheromones.pop(i) 
 
-    def print(self) -> str: 
+    def print(self, length: int = 9) -> str: 
         """ 
-        Print the tile's attributes and returns a string. 
+        Print the tile's attributes and returns a string; the messages have length `length`. 
         """ 
         ants = self.total_ants 
         if self.anthill_name is not None: 
             # Compute the amount of storage and the quantity of ants 
             storage = self.map.anthills[(self.x_pos, self.y_pos)].food_storage 
-            return "|A,{storage},{ants}|".format(storage=storage,ants=ants)
+            msg = "A,{storage},{ants}".format(storage=storage,ants=ants)
         elif self.is_food: 
             # Compute the volume of the food 
             volume = self.map.foods[(self.x_pos, self.y_pos)].volume 
-            return "|F,{volume},{ants}|".format(volume=volume, ants=ants) 
+            msg = "F,{volume},{ants}".format(volume=volume, ants=ants) 
         else: 
-            return "|{ants}|".format(ants=ants) 
+            msg = "{ants}".format(ants=ants) 
+
+        # Compute the message's length 
+        msg_length = len(msg) + 2 # we use `2` for the bars, | 
+        delta = length - msg_length 
+        if delta >= 1: # Confront with the message's size  
+            lsp = " " * (delta//2) 
+            rsp = " " * (delta - delta//2) 
+            # Resize the message 
+            msg = "|" + lsp + msg + rsp + "|" 
+
+        return msg 
+
+
