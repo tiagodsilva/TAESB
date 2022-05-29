@@ -18,9 +18,11 @@ def main():
     foods = [(1, 5, 9)] 
     food_update = 3 
     ants_fov = 1 
+    pheromones_lifetime = 9
     verbose = True 
     
-    world = Map(width, height, anthills, foods, food_update, ants_fov, verbose) 
+    world = Map(width, height, anthills, foods, food_update, ants_fov, 
+            pheromones_lifetime, verbose) 
     
     world.run() 
 
