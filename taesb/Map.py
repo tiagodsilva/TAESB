@@ -149,7 +149,10 @@ class Map(object):
         else: 
             return False 
 
-    def run(self, n_iterations: int = None, max_foods: int = None): 
+    def run(self, 
+            n_iterations: int = None, 
+            max_foods: int = None, 
+            callbacks: CallbackList = None): 
         """
         Simulate the game for `n_iterations` iterations if it is not None 
         and forever otherwise. If an anthill gather more than `max_foods` 
@@ -178,7 +181,8 @@ class Map(object):
                 break 
             self.iteration += 1 
             
-            current_foods.delay([anthill.food_storage for anthill in self.anthills.values()]) 
+            if callbacks: 
+                callbacks.execute(self) 
 
             if self.verbose: 
                 self.print() 
