@@ -28,5 +28,5 @@ class CallbacksList(object):
         """ 
         # Serialize map 
         json_map = global_map.to_json() 
-        for callback in callbacks: 
-            callbacks.delay(json_map) 
+        for callback in self.callbacks: 
+            callback.delay(json_map) 

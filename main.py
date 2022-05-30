@@ -2,10 +2,9 @@
 Simulate a map with ants. 
 """ 
 import os 
-from taesb.Map import Map 
-import taesb.config as config 
-
+import taesb 
 import taesb.celery.tasks as tasks 
+import taesb.config as config 
 
 import argparse 
 
@@ -88,8 +87,12 @@ def main(args):
     """ 
     Initialize the simulation. 
     """ 
+    callbacks = taesb.CallbacksList( 
+            tasks.current_foods 
+    ) 
+
     # Instantiate a map 
-    world = Map( 
+    world = taesb.Map( 
             width=args.width, 
             height=args.height,
             anthills=args.anthills,
@@ -100,7 +103,8 @@ def main(args):
             verbose=args.verbose
         ) 
 
-    world.run(max_foods=args.max_foods) 
+    world.run(max_foods=args.max_foods, 
+            callbacks=callbacks) 
 
 if __name__ == "__main__": 
     parser = argparse.ArgumentParser(description="Parse the parameters to start the invasion of the ants.")

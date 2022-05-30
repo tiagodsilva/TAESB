@@ -311,12 +311,12 @@ class Map(object):
 
         # Serialize the ants 
         self.json["ants"] = [{ 
-            "loc": (ant.x, ant.y), 
+            "loc": (int(ant.x_pos), int(ant.y_pos)), 
             "has_food": ant.has_food, 
             "captured_food": ant.captured_food, 
             "colony_name": ant.colony.name 
         } for ant in self.ants] 
-
+        
         return self.json 
 
             
