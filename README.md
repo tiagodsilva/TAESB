@@ -48,3 +48,44 @@ python main.py
 
 to start a producer. 
 
+You should also install PostgreSQL; for this, execute 
+
+``` 
+sudo apt-get install wget ca-certificates
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+sudo apt-get update
+sudo apt-get install postgresql postgresql-contrib
+``` 
+
+and then 
+
+``` 
+sudo su - postgres
+``` 
+
+to enjoy root access to the data base. In this scenario, execute 
+
+``` 
+psql
+CREATE USER {username} WITH PASSWORD '{password}'; 
+``` 
+
+to instantiate an user. In Python, install the `psycopg2` package with 
+
+``` 
+pip install python-psycopg2 
+``` 
+
+to access the database; the commands 
+
+```py 
+import psycopg2 
+
+conn = psycopg2.connect(database="postgres", 
+	user="{username}",
+	password="{password}" 
+``` 
+	
+will provide you this access. 
+
