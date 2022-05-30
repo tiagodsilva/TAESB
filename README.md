@@ -15,16 +15,36 @@ to contemplate their machinations.
 
 # Install 
 
-In this application, we use NumPy, Celery and Flask; execute 
+In this application, we use NumPy, Celery, Flask, and Redis; execute 
 
 ``` 
-pip install numpy celery flask 
+pip install numpy celery flask redis 
 ``` 
 
-to install them. In this sense, use the command 
+to install them. Then, apply 
+
+``` 
+chmod +x redis.sh 
+./redis.sh 
+``` 
+
+to initialize Redis. In this sense, use the command 
 
 ``` 
 celery -A taesb worker --loglevel=INFO 
 ``` 
 
-at the root directory of this repository to start the program. 
+at the root directory of this repository to start the program. Circumstantially, execute 
+
+``` 
+python taesb/celery/app.py
+``` 
+
+to start the Flask application, and use your browser to display the site `http://127.0.0.1:4444/`. Execute, in the next step, 
+
+``` 
+python main.py 
+``` 
+
+to start a producer. 
+
