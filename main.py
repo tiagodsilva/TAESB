@@ -3,6 +3,7 @@ Simulate a map with ants.
 """ 
 import os 
 from taesb.Map import Map 
+import taesb.config as config 
 
 import argparse 
 
@@ -26,8 +27,8 @@ def anthills(s: str):
         s = [(str(name), int(x), int(y), int(ants)) for name, x, y, ants in \
                 s] 
 
-        return anthills 
-    except: 
+        return s 
+    except Exception as e: 
         raise argparse.ArgumentTypeError("The parameter `anthills` should have specifically \
 the format `name[str],x[int],y[int],ants[int];...;name[str],x[int],y[int],ants[int]`") 
  
@@ -60,23 +61,25 @@ def parse_args(parser: argparse.ArgumentParser):
     Parse the command line parameters for the parser `parser`. 
     """ 
     parser.add_argument("--width", help="The width of the map.", 
-            type=int) 
+            type=int, default=config.WIDTH) 
     parser.add_argument("--height", help="The height of the map.", 
-            type=int) 
+            type=int, default=config.HEIGHT) 
     parser.add_argument("--anthills", help="The distributions of the anthills across the map, \
 with the format name[str],x[int],y[int],ants[int];...;name[str],x[int],y[int],ants[int].", 
-            type=anthills) 
+            type=anthills, default=config.ANTHILLS) 
     parser.add_argument("--foods", help="The distributions of the foods across the map, \
-with the format x[int],y[int],volume[int];...;x[int],y[int],volume[int].") 
+with the format x[int],y[int],volume[int];...;x[int],y[int],volume[int].", 
+            type=foods, default=config.FOODS) 
     parser.add_argument("--food_update", help="The rate with which we update the foods in the map.", 
-            type=int) 
+            type=int, default=config.FOOD_UPDATE) 
     parser.add_argument("--ants_fov", help="The ants' field of view.", 
-            type=int) 
+            type=int, default=config.ANTS_FOV) 
     parser.add_argument("--pherlt", help="The pheromones' lifetime.", 
-            type=int) 
+            type=int, default=config.PHEROMONES_LIFETIME) 
     parser.add_argument("--verbose", help="Whether to display the map's characteristics.", 
             type=bool, default=False) 
-    
+    parser.add_argument("--max_foods", help="The quantity of foods for an anthill be characterized as the winner", 
+            type=int, default=config.MAX_FOODS) 
     return parser.parse_args() 
 
 def main(args): 
@@ -84,7 +87,6 @@ def main(args):
     Initialize the simulation. 
     """ 
     # Instantiate a map 
-
     world = Map( 
             width=args.width, 
             height=args.height,
