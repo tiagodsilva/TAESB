@@ -1,7 +1,7 @@
 """ 
 Implement the Map class. 
 """ 
-from typing import List, Tuple, Dict 
+from typing import List, Tuple, Dict, Any  
 from .Anthill import Anthill
 from .Ant import Ant 
 from .Tile import Tile 
@@ -27,6 +27,7 @@ class Map(object):
     verbose: bool 
     food_update: int 
     pheromones_lifetime: int 
+    json: Dict[str, Any] 
 
     def __init__(self, 
             width: int, 
@@ -61,6 +62,9 @@ class Map(object):
 
         # A flag for the current iteration 
         self.iteration = 0 
+        
+        # An object should be JSON serializable to be compatible with Celery's communication 
+        self.json = dict() 
 
         # Whether we should print the map 
         self.verbose = verbose 
@@ -287,3 +291,32 @@ class Map(object):
                 self.iteration, self.pheromones_lifetime 
         ) 
 
+    def to_json(self): 
+        """ 
+        Serialize the map to JSON. 
+        """ 
+        # Serialize the foods 
+        self.json["foods"] = [{ 
+            "loc": (x, y), 
+            "volume": self.foods[(x, y)].volume 
+        } for (x, y) in self.foods]
+
+        # Serialize the anthills 
+        self.json["anthills"] = [{ 
+            "loc": (x, y), 
+            "food_storage": self.anthills[(x, y)].food_storage, 
+            "name": self.anthills[(x, y)].name, 
+            "ants": self.anthills[(x, y)].initial_ants 
+        } for (x, y) in self.anthills] 
+
+        # Serialize the ants 
+        self.json["ants"] = [{ 
+            "loc": (ant.x, ant.y), 
+            "has_food": ant.has_food, 
+            "captured_food": ant.captured_food, 
+            "colony_name": ant.colony.name 
+        } for ant in self.ants] 
+
+        return self.json 
+
+            
