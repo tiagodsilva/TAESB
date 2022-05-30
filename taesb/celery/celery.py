@@ -22,7 +22,7 @@ def make_celery(app: Flask):
 flask_app = Flask("taesb") 
 flask_app.config.update(CELERY_CONFIG={ 
     "broker":"amqp://", 
-    "include":["taesb.celery.tasks"] 
+    "include":["taesb.celery.callbacks"] 
 }) 
 
 app = make_celery(flask_app) 
