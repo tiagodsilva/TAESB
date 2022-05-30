@@ -4,7 +4,8 @@ Simulate a map with ants.
 import os 
 from taesb.Map import Map 
 
-def main(): 
+import argparse 
+def main(args): 
     """ 
     Initialize the simulation. 
     """ 
@@ -19,16 +20,18 @@ def main():
     max_foods = 19 
     verbose = True 
     
-    print("There are a triplet of distinct tiles:") 
-    print("+ the usual tiles, with values (x, y), in which", 
-            "x equals the pheromones' intensity and y, the quantity of ants;") 
-    print("+ the anthills, with the format (A, x, y), with x equal to the", 
-            "volume of the food storage and y to the quantity of ants;") 
-    print("+ and (F, x), the foods tiles, characterized by the food volume, x.")
-    world = Map(width, height, anthills, foods, food_update, ants_fov, 
-            pheromones_lifetime, verbose=False)
-        
-    world.run(max_foods=9999999999) 
+    world = Map( 
+            width=args.width, 
+            height=args.height,
+            anthills=args.anthills,
+            foods=args.foods,
+            food_update=args.food_update,
+            ants_fov=args.ants_fov,
+            pheromones_lifetime=args.pherlt, 
+            verbose=args.verbose
+        ) 
+
+    world.run(max_foods=args.max_foods) 
 
 if __name__ == "__main__": 
     main() 
