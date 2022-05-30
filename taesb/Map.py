@@ -7,7 +7,7 @@ from .Ant import Ant
 from .Tile import Tile 
 from .Food import Food 
 
-from .celery.tasks import current_foods 
+from .CallbacksList import CallbacksList 
 
 import time 
 import numpy as np 
@@ -156,7 +156,7 @@ class Map(object):
     def run(self, 
             n_iterations: int = None, 
             max_foods: int = None, 
-            callbacks: CallbackList = None): 
+            callbacks: CallbacksList = None): 
         """
         Simulate the game for `n_iterations` iterations if it is not None 
         and forever otherwise. If an anthill gather more than `max_foods` 
