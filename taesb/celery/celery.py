@@ -5,7 +5,7 @@ from celery import Celery
 
 app = Celery("taesb", 
         broker="amqp://", 
-        include=["taesb.celery.map_async"])
+        include=["taesb.celery.tasks"])
 
 if __name__ == "__main__": 
     app.start() 

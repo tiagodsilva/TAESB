@@ -7,17 +7,10 @@ from .Ant import Ant
 from .Tile import Tile 
 from .Food import Food 
 
-from .celery.celery import app 
+from .celery.tasks import current_foods 
 
 import time 
 import numpy as np 
-
-@app.task 
-def current_foods(foods: List[int]): 
-    """ 
-    Return the current quantity of foods in each anthill. 
-    """ 
-    return foods 
 
 class Map(object): 
     """ 
