@@ -147,10 +147,11 @@ class Map(object):
         else: 
             return False 
 
-    def run(self, n_iterations: int = None): 
+    def run(self, n_iterations: int = None, max_foods: int = None): 
         """
         Simulate the game for `n_iterations` iterations if it is not None 
-        and forever otherwise. 
+        and forever otherwise. If an anthill gather more than `max_foods` 
+        units of foods, it wins the simulation. 
         """ 
         # Execute the game 
         while n_iterations is None or self.iteration < n_iterations: 
@@ -164,10 +165,39 @@ class Map(object):
             # Restore foods 
             self.restore_foods() 
 
+            # Check if an anthill won the simulation 
+            winners = self.check_winners(max_foods) 
+            
+            if winners is not None: 
+                if self.verbose: 
+                    print("The winner(s) is(are) {winners}!".format( 
+                        winners=winners)
+                    ) 
+                break 
             self.iteration += 1 
             if self.verbose: 
                 self.print() 
                 time.sleep(1)  
+
+    def check_winners(self, max_foods: int): 
+        """ 
+        Check if an anthill won the simulation. 
+        """ 
+        if max_foods is None: 
+            # If max foods is None, return None 
+            return max_foods 
+
+        # Otherwise, check if an anthill (or multiple anthills) 
+        # won the simulation 
+        winners = [anthill for anthill in self.anthills in \
+                anthill.food_storage > max_foods] 
+        
+        if len(winners) < 1: 
+            # Returns None if currently there are no winners 
+            return None 
+
+        # Return the winners 
+        return winners 
 
     def restore_foods(self): 
         """ 
