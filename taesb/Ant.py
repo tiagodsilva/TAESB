@@ -1,9 +1,9 @@
 """ 
 Implement the ant class.
 """ 
-import Anthill 
-import Tile 
-import Food
+from .Anthill import Anthill 
+from .Tile import Tile 
+from .Food import Food 
 
 import numpy as np 
 
@@ -21,9 +21,9 @@ class Ant(object):
     map: Map # The global map subjacent to the simulation 
     has_food: bool # Whether the ant has food 
     captured_food: int # The amount of food brough by this ant 
-    colony: Anthill.Anthill # The colony correspondent to this ant 
+    colony: Anthill # The colony correspondent to this ant 
 
-    def __init__(self, colony: Anthill.Anthill, global_map: Map): 
+    def __init__(self, colony: Anthill, global_map: Map): 
         """ 
         Constructor method for an ant at an Anthill `Anthill`. 
         """ 
@@ -37,14 +37,14 @@ class Ant(object):
         # The amo:unt of food brought by this ant 
         self.captured_food = 0 
 
-    def eat(self, food: Food.Food): 
+    def eat(self, food: Food): 
         """ 
         Eat a unit of the food `Food`. 
         """ 
         # Returns False if there is no food available 
         self.has_food = food.consume() 
 
-    def _move_segment(self, dest: Union[Tile.Tile, Anthill.Anthill]) -> Tuple[int, int]: 
+    def _move_segment(self, dest: Union[Tile, Anthill]) -> Tuple[int, int]: 
         """ 
         Move across a segment that starts at (`self.x_pos`, `self.y_pos`) 
         and is bounded by `dest`. 

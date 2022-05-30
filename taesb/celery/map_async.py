@@ -2,7 +2,7 @@
 An async version of the map. 
 """ 
 # Import the map application 
-from Map import Map 
+from taesb.Map import Map 
 
 class MapAsync(Map): 
     """ 

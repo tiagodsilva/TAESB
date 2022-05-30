@@ -3,10 +3,9 @@ Implement a Celery application for the extensions of the ants' empire.
 """ 
 from celery import Celery 
 
-app = Celery("ants", 
+app = Celery("taesb", 
         broker="amqp://", 
-        include=["src.celery", 
-            "src.Map"])
+        include=["taesb.celery.map_async"])
 
 if __name__ == "__main__": 
     app.start() 

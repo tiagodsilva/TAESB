@@ -1,7 +1,7 @@
 """ 
 Implement the Tile class. 
 """ 
-from Pheromone import Pheromone 
+from .Pheromone import Pheromone 
 
 from typing import List, TypeVar
 

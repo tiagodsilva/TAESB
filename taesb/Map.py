@@ -2,10 +2,10 @@
 Implement the Map class. 
 """ 
 from typing import List, Tuple, Dict 
-import Anthill 
-import Ant 
-import Tile 
-import Food 
+from .Anthill import Anthill
+from .Ant import Ant 
+from .Tile import Tile 
+from .Food import Food 
 
 import time 
 import numpy as np 
@@ -17,10 +17,10 @@ class Map(object):
 
     width: int 
     height: int 
-    anthills: Dict[Tuple[int, int], Anthill.Anthill] 
-    foods: Dict[Tuple[int, int], Food.Food] 
+    anthills: Dict[Tuple[int, int], Anthill] 
+    foods: Dict[Tuple[int, int], Food] 
     ants_fov: int 
-    ants: List[Ant.Ant] 
+    ants: List[Ant] 
     iteration: int 
     verbose: bool 
     food_update: int 
@@ -43,8 +43,8 @@ class Map(object):
         
         # Initialize the objects in the map 
         self.tiles = list()  
-        self.anthills = {(spec[1], spec[2]):Anthill.Anthill(*spec) for spec in anthills}
-        self.foods = {(spec[0], spec[1]):Food.Food(*spec) for spec in foods} 
+        self.anthills = {(spec[1], spec[2]):Anthill(*spec) for spec in anthills}
+        self.foods = {(spec[0], spec[1]):Food(*spec) for spec in foods} 
         self.food_update = food_update 
 
         self.initialize_tiles(anthills, foods) 
@@ -73,7 +73,7 @@ class Map(object):
             self.tiles.append(list()) 
             for y in range(self.height): 
                 # Instantiate a tile in the game 
-                tile = Tile.Tile(x, y, self) 
+                tile = Tile(x, y, self) 
 
                 # Check if it should be an anthill 
                 tile.anthill_name = self.anthills[(x, y)].name \
@@ -87,7 +87,7 @@ class Map(object):
         
                 self.tiles[x].append(tile) 
     
-    def initialize_ants(self, anthills: List[Anthill.Anthill]): 
+    def initialize_ants(self, anthills: List[Anthill]): 
         """ 
         Initialize the ants in the game at each anthill in `anthills`. 
         """ 
@@ -97,9 +97,9 @@ class Map(object):
             # The field of view (self.ants_fov) is not an attribute of the ants; 
             # it is shared across all species and, then, it is globally 
             # available at this class 
-            self.ants += [Ant.Ant(anthill, self) for ant in range(n_ants)] 
+            self.ants += [Ant(anthill, self) for ant in range(n_ants)] 
     
-    def nearest_food(self, x_pos: int, y_pos: int) -> Tile.Tile: 
+    def nearest_food(self, x_pos: int, y_pos: int) -> Tile: 
         """
         Compute the nearest tile with food at the taxicab metric ball with 
         radius `self.ants_fov`.  
