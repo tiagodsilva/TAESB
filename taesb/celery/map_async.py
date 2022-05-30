@@ -2,17 +2,29 @@
 An async version of the map. 
 """ 
 # Import the map application 
+from .celery import app 
 from taesb.Map import Map 
 
-class MapAsync(Map): 
+def run_simulation(width: int, 
+        height: int, 
+        anthills: List[Tuple[str, int, int, int]], 
+        foods: List[Tuple[int, int, int]], 
+        food_update: int, 
+        ants_fov: int, 
+        pheromones_lifetime: int 
+    ): 
     """ 
-    Implement an asynchronous version of the map, compatible with the 
-    Celery framework. 
+    Initialize a simulation of the ants' intergalatic empires. 
     """ 
+    world = Map( 
+            width=width, 
+            height=heigth,
+            anthills=anthills,
+            foods=foods,
+            food_update=food_update,
+            ants_fov=ants_fov,
+            pheromones_lifetime=pheromones_lifetime, 
+            verbose=False
+    ) 
 
-    def run_async(self, max_foods: int): 
-        """ 
-        Execute the simulation. 
-        """ 
-        super().run(max_foods=max_foods)
-
+    world.run() 
