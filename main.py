@@ -30,7 +30,7 @@ def main():
     world = Map(width, height, anthills, foods, food_update, ants_fov, 
             pheromones_lifetime, verbose) 
     
-    world.run() 
+    world.run(max_foods=19) 
 
 if __name__ == "__main__": 
     main() 

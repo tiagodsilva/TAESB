@@ -189,7 +189,7 @@ class Map(object):
 
         # Otherwise, check if an anthill (or multiple anthills) 
         # won the simulation 
-        winners = [anthill for anthill in self.anthills in \
+        winners = [anthill.name for anthill in self.anthills.values() if \
                 anthill.food_storage > max_foods] 
         
         if len(winners) < 1: 
