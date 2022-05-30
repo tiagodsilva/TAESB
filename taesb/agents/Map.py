@@ -7,7 +7,7 @@ from .Ant import Ant
 from .Tile import Tile 
 from .Food import Food 
 
-from .CallbacksList import CallbacksList 
+from ..utils.CallbacksList import CallbacksList 
 
 import time 
 import numpy as np 

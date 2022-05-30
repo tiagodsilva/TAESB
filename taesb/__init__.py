@@ -1,2 +1,2 @@
-from .Map import Map
-from .CallbacksList import CallbacksList 
+from .agents.Map import Map
+from .utils.CallbacksList import CallbacksList 

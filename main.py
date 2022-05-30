@@ -3,7 +3,7 @@ Simulate a map with ants.
 """ 
 import os 
 import taesb 
-import taesb.celery.tasks as tasks 
+import taesb.celery.app as tasks 
 import taesb.config as config 
 
 import argparse 
