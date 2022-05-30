@@ -5,6 +5,8 @@ import os
 from taesb.Map import Map 
 import taesb.config as config 
 
+import taesb.celery.tasks as tasks 
+
 import argparse 
 
 def anthills(s: str): 
