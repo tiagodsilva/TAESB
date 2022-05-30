@@ -7,8 +7,17 @@ from .Ant import Ant
 from .Tile import Tile 
 from .Food import Food 
 
+from .celery.celery import app 
+
 import time 
 import numpy as np 
+
+@app.task 
+def current_foods(foods: List[int]): 
+    """ 
+    Return the current quantity of foods in each anthill. 
+    """ 
+    return foods 
 
 class Map(object): 
     """ 
@@ -175,6 +184,9 @@ class Map(object):
                     ) 
                 break 
             self.iteration += 1 
+            
+            current_foods.delay([anthill.food_storage for anthill in self.anthills.values()]) 
+
             if self.verbose: 
                 self.print() 
                 time.sleep(1)  
@@ -189,6 +201,7 @@ class Map(object):
 
         # Otherwise, check if an anthill (or multiple anthills) 
         # won the simulation 
+
         winners = [anthill.name for anthill in self.anthills.values() if \
                 anthill.food_storage > max_foods] 
         

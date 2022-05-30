@@ -16,6 +16,7 @@ def main():
     food_update = 3 
     ants_fov = 1 
     pheromones_lifetime = 9
+    max_foods = 19 
     verbose = True 
     
     print("There are a triplet of distinct tiles:") 
@@ -25,9 +26,9 @@ def main():
             "volume of the food storage and y to the quantity of ants;") 
     print("+ and (F, x), the foods tiles, characterized by the food volume, x.")
     world = Map(width, height, anthills, foods, food_update, ants_fov, 
-            pheromones_lifetime, verbose) 
-    
-    world.run(max_foods=19) 
+            pheromones_lifetime, verbose=False)
+        
+    world.run(max_foods=9999999999) 
 
 if __name__ == "__main__": 
     main() 
