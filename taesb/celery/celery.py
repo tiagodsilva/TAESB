@@ -11,7 +11,8 @@ from typing import Dict
 # Instantiate a flask application 
 app = Celery( 
         "taesb", 
-        broker="amqp://" 
+        broker="amqp://", 
+        include=["taesb.celery.tasks"]
 ) 
 
 if __name__ == "__main__": 
