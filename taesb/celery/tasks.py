@@ -41,6 +41,8 @@ def init_worker(**kwargs):
     ) 
     cur = db_conn.cursor() 
     
+    # Execute a query to create the tables 
     cur.execute(DB_CREATE_QUERY)  
-
+    
+    # Commit the updates to the database 
     db_conn.commit() 
