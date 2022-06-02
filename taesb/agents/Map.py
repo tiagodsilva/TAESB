@@ -11,6 +11,7 @@ from ..utils.CallbacksList import CallbacksList
 
 import time 
 import numpy as np 
+import uuid 
 
 class Map(object): 
     """ 
@@ -28,6 +29,7 @@ class Map(object):
     food_update: int 
     pheromones_lifetime: int 
     json: Dict[str, Any] 
+    identifier: str 
 
     def __init__(self, 
             width: int, 
@@ -68,6 +70,8 @@ class Map(object):
 
         # Whether we should print the map 
         self.verbose = verbose 
+        
+        self.identifier = uuid.uuid4() 
 
     def initialize_tiles(self, 
             anthills: List[Tuple[str, int, int, int]], 

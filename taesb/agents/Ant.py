@@ -6,6 +6,7 @@ from .Tile import Tile
 from .Food import Food 
 
 import numpy as np 
+import uuid 
 
 from typing import Tuple, Union, TypeVar 
 
@@ -22,6 +23,7 @@ class Ant(object):
     has_food: bool # Whether the ant has food 
     captured_food: int # The amount of food brough by this ant 
     colony: Anthill # The colony correspondent to this ant 
+    identifier: str # Essentially unique identifier 
 
     def __init__(self, colony: Anthill, global_map: Map): 
         """ 
@@ -36,6 +38,8 @@ class Ant(object):
         
         # The amo:unt of food brought by this ant 
         self.captured_food = 0 
+
+        self.identifier = uuid.uuid4() 
 
     def eat(self, food: Food): 
         """ 

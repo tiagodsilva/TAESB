@@ -1,6 +1,7 @@
 """ 
 Implement the Food class.
 """ 
+import uuid 
 
 class Food(object): 
     """ 
@@ -11,6 +12,7 @@ class Food(object):
     y_pos: int # The vertical location 
     initial_volume: int # The initial volume 
     volume: int # The current volume at each iteration 
+    identifier: str # Essentially unique identifier 
 
     def __init__(self, x_pos: int, 
             y_pos: int, 
@@ -25,6 +27,8 @@ class Food(object):
         
         # The current volume, at each iteration of the simulation 
         self.volume = initial_volume 
+        
+        self.identifier = uuid.uuid4() 
 
     def consume(self) -> bool: 
         """ 

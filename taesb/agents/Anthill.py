@@ -1,6 +1,7 @@
 """ 
 Implement the Anthill class. 
 """
+import uuid 
 
 class Anthill(object): 
     """ 
@@ -11,7 +12,8 @@ class Anthill(object):
     x_pos: int # Its horizontal location 
     y_pos: int # Its vertical location 
     initial_ants: int # The initial quanity of ants 
-    
+    identifier: str # Essentially unique identifier 
+
     def __init__(self, name: str, 
             x_pos: int, 
             y_pos: int, 
@@ -26,6 +28,8 @@ class Anthill(object):
         self.name = name 
 
         self.food_storage = 0 
+        
+        self.identifier = uuid.uuid4() 
 
     def increment_food(self): 
         """ 
