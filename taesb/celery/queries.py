@@ -20,6 +20,7 @@ DB_CREATE_ANTHILLS = """CREATE TABLE IF NOT EXISTS anthills (
     anthill_id INT PRIMARY KEY,
     name VARCHAR (99) NOT NULL, 
     food_storage INT, 
+    total_ants INT, 
     scenario_id INT, 
     CONSTRAINT fk_scenario 
         FOREIGN KEY(scenario_id) 
@@ -53,10 +54,8 @@ INSERT_SCENARIOS = lambda scenario_id: """INSERT INTO scenarios VALUES
     ({scenario_id})""".format(scenario_id=scenario_id) 
 
 def INSERT_ANTHILLS( 
-            anthill_ids: List[str], 
-            names: List[str], 
-            food_storages: List[int], 
-            scenario_ids: List[int] 
+            anthills: List[Dict], 
+            scenario_id: str 
         ): 
     """ 
     Insert instance into the anthills table. 
@@ -64,14 +63,18 @@ def INSERT_ANTHILLS(
     # Initialize query 
     query = str() 
     # Iterate across the attributes 
-    for (anthill_id, name, food_storage, scenario_id) in zip( 
-            anthill_ids, names, food_storages, scenario_ids): 
+    for anthill in anthills: 
+        # Capture attributes 
+        anthill_id = anthill["identifier"] 
+        name = anthill["name"] 
+        total_ants = anthill["ants"] 
         query += "INSERT INTO anthills VALUES \n" 
         # Insert into data base if it not exists; else, update the value 
-        query += "({anthill_id}, {name}, {food_storage}, {scenario_id})\n".format( 
+        query += "({anthill_id}, {name}, {food_storage}, {total_ants}, {scenario_id})\n".format( 
                 anthill_id=anthill_id, 
                 name=name,
-                food_storage=food_storage,
+                food_storage=food_storage, 
+                total_ants=total_ants, 
                 scenario_id=scenario_id) 
         # Check if a register already exists; if so, update it 
         query += """ON CONFLICT ({anthill_id}) 
