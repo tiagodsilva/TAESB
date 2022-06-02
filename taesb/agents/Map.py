@@ -30,6 +30,7 @@ class Map(object):
     pheromones_lifetime: int 
     json: Dict[str, Any] 
     identifier: str 
+    execution_time: int 
 
     def __init__(self, 
             width: int, 
@@ -72,6 +73,10 @@ class Map(object):
         self.verbose = verbose 
         
         self.identifier = uuid.uuid4() 
+            
+        # The execution time of the scenario, measure with respect to the 
+        # quantity of iterations 
+        self.execution_time = None 
 
     def initialize_tiles(self, 
             anthills: List[Tuple[str, int, int, int]], 
@@ -199,6 +204,9 @@ class Map(object):
                 self.print() 
                 time.sleep(1)  
 
+        # Update the database with the current data 
+        callbacks.stage_update(self)  
+
     def check_winners(self, max_foods: int): 
         """ 
         Check if an anthill won the simulation. 
@@ -304,6 +312,7 @@ class Map(object):
         """ 
         # Serialize the foods 
         self.json["scenario_id"] = self.identifier 
+        self.json["execution_time"] = self.execution_time 
 
         self.json["foods"] = [{ 
             "loc": (x, y), 
