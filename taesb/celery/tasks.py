@@ -34,7 +34,7 @@ def current_foods(global_map: Dict):
     cur = db_conn.cursor() 
     cur.execute(query) 
     cur.close() 
-    # db_conn.commit() 
+    db_conn.commit() 
 
 # Instantiate a connection to the database for 
 # each worker 
