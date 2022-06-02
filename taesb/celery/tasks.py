@@ -9,11 +9,14 @@ import psycopg2
 from .queries import DB_CREATE_SCENARIOS, \
         DB_CREATE_ANTHILLS, \
         DB_CREATE_ANTS, \
-        DB_CREATE_FOODS 
+        DB_CREATE_FOODS, \
+        DROP_TABLES 
 import time 
 
 # Docs 
 from typing import Dict 
+
+DEBUG = True 
 
 @app.task() 
 def current_foods(global_map: Dict): 
@@ -45,6 +48,9 @@ def init_worker(**kwargs):
     ) 
     cur = db_conn.cursor() 
     
+    if DEBUG: 
+        cur.execute(DROP_TABLES) 
+
     # Execute a query to create the tables 
     for db in [DB_CREATE_SCENARIOS, DB_CREATE_ANTHILLS, DB_CREATE_ANTS, DB_CREATE_FOODS]: 
         cur.execute(db) 

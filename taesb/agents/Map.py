@@ -304,12 +304,13 @@ class Map(object):
 
         self.json["foods"] = [{ 
             "loc": (x, y), 
-            "volume": self.foods[(x, y)].volume, 
-            "identifier": self.foods[(x, y)].identifier 
+            "current_volume": self.foods[(x, y)].volume, 
+            "identifier": self.foods[(x, y)].identifier, 
+            "initial_volume": self.foods[(x, y)].initial_volume 
         } for (x, y) in self.foods]
 
         # Serialize the anthills 
-        self.json["anthills"] = [{ 
+        self.json["anthills"] = [{   
             "loc": (x, y), 
             "food_storage": self.anthills[(x, y)].food_storage, 
             "name": self.anthills[(x, y)].name, 
@@ -323,7 +324,8 @@ class Map(object):
             "has_food": ant.has_food, 
             "captured_food": ant.captured_food, 
             "colony_name": ant.colony.name, 
-            "identifier": ant.identifier 
+            "identifier": ant.identifier, 
+            "anthill_identifier": ant.colony.identifier  
         } for ant in self.ants] 
         
         return self.json 

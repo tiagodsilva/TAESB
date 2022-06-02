@@ -1,7 +1,13 @@
 """ 
 Implement queries for the database. 
 """ 
-from typing import List 
+from typing import List, Dict 
+
+# Drop tables; appropriate for debugging 
+DROP_TABLES = """DROP TABLE IF EXISTS scenarios CASCADE; 
+DROP TABLE IF EXISTS anthills CASCADE; 
+DROP TABLE IF EXISTS ants CASCADE; 
+DROP TABLE IF EXISTS foods CASCADE;""" 
 
 # Create table for the scenarios 
 DB_CREATE_SCENARIOS = """CREATE TABLE IF NOT EXISTS scenarios ( 
@@ -25,10 +31,10 @@ DB_CREATE_ANTS = """CREATE TABLE IF NOT EXISTS ants (
     ant_id INT PRIMARY KEY, 
     captured_food INT, 
     searching_food BOOL, 
-    scenario_id INT, 
-    CONSTRAINT fk_scenario 
-        FOREIGN KEY(scenario_id) 
-            REFERENCES scenarios(scenario_id) 
+    anthill_id INT, 
+    CONSTRAINT fk_anthill 
+        FOREIGN KEY(anthill_id) 
+            REFERENCES scenarios(anthill_id) 
 );""" 
 
 # Create table for the foods 
@@ -79,10 +85,7 @@ def INSERT_ANTHILLS(
     return query 
 
 def INSERT_ANTS( 
-        ant_ids: List[str], 
-        captured_foods: List[int], 
-        searching_foods: List[bool], 
-        scenario_ids: List[int] 
+        ants: List[Dict], 
     ): 
     """ 
     Insert data into the ants table. 
@@ -90,15 +93,19 @@ def INSERT_ANTS(
     # Initialize the query 
     query = str() 
     # Iterate across the attributes 
-    for (ant_id, captured_food, searching_food, scenario_id) in zip( 
-            ant_ids, captured_foods, searchgin_foods, scanerio_ids): 
+    for ant in ants: 
+        and_id = ant["identifier"] 
+        captured_food = ant["captured_food"] 
+        anthill_id = ant["anthill_identifier"] 
+        searching_food = not ant["has_food"] 
+
         query += "INSERT INTO ants VALUES \n" 
         # Insert the instances 
-        query += "({ant_id}, {captured_food}, {searching_food}, {scenario_id}) \n".format( 
+        query += "({ant_id}, {captured_food}, {searching_food}, {anthill_id}) \n".format( 
                 ant_id=ant_id, 
                 captured_food=captured_food,
                 searching_food=searching_food,
-                scenario_id=scenario_id 
+                anthill_id=anthill_id 
         ) 
         # Update data if it already exists 
         query += """CONSTRAINT ({ant_id}) 
@@ -115,10 +122,8 @@ DO
 
 # Insert the foods into the food data set 
 def INSERT_FOODS( 
-        food_ids: List[str], 
-        initial_volumes: List[int], 
-        current_volumes: List[int], 
-        scenario_ids: List[int] 
+        foods: List[Dict], 
+        scenario_id: str 
     ): 
     """ 
     Insert foods in the food data set table. 
@@ -126,9 +131,12 @@ def INSERT_FOODS(
     # Initialize the query 
     query = str() 
     # Iterate across the attributes 
-    for (food_id, initial_volume, current_volume, scenario_id) in zip( 
-            food_ids, initial_volumes, current_volumes, scenario_ids): 
+    for food in foods: 
         # Insert instances 
+        food_id = food["identifier"] 
+        initial_volume = food["initial_volume"] 
+        current_volume = food["current_volume"] 
+
         query += "INSERT INTO foods VALUES \n" 
         query += "({food_id}, {initial_volume}, {current_volume}, {scenario_id})".format( 
                 food_id=food_id, 
