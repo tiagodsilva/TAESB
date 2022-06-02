@@ -30,14 +30,13 @@ def update_database(global_map: Dict):
     """  
     scenario_id = global_map["scenario_id"] 
     queries = [INSERT_SCENARIOS(scenario_id), 
-            INSERT_ANTS(global_map["ants"]), 
-            INSERT_ANTHILLS(global_map["anthills"], scenario_id), 
-            INSERT_FOODS(global_map("foods"), scenario_id) 
+        INSERT_ANTHILLS(global_map["anthills"], scenario_id), 
+        INSERT_FOODS(global_map["foods"], scenario_id), 
+        INSERT_ANTS(global_map["ants"]) 
     ] 
     
     # Instantiate a cursor 
     cur = db_conn.cursor() 
-
     # Execute each query 
     for query in queries: 
         cur.execute(query) 
@@ -56,7 +55,7 @@ def current_foods(global_map: Dict):
     # Identify the anthills 
     anthills = [anthill for anthill in global_map["anthills"]] 
     # and the foods 
-    foods = [(anthill[["name"], anthill["food_storage"]) for anthill in anthills] 
+    foods = [(anthill["name"], anthill["food_storage"]) for anthill in anthills] 
     
     # Return the quantity of foods in each anthill 
     return foods 

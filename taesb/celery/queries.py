@@ -70,6 +70,7 @@ def INSERT_ANTHILLS(
         anthill_id = anthill["identifier"] 
         name = anthill["name"] 
         total_ants = anthill["ants"] 
+        food_storage = anthill["food_storage"] 
         query += "INSERT INTO anthills VALUES \n" 
         # Insert into data base if it not exists; else, update the value 
         query += "('{anthill_id}', '{name}', {food_storage}, {total_ants}, '{scenario_id}')\n".format( 
@@ -81,8 +82,7 @@ def INSERT_ANTHILLS(
         # Check if a register already exists; if so, update it 
         query += """ON CONFLICT (anthill_id) 
     DO 
-        UPDATE SET food_storage = {food_storage} 
-        WHERE anthill_id = '{anthill_id}';\n""".format( 
+        UPDATE SET food_storage = {food_storage};\n""".format( 
                     food_storage=food_storage, 
                     anthill_id=anthill_id) 
     
@@ -99,7 +99,7 @@ def INSERT_ANTS(
     query = str() 
     # Iterate across the attributes 
     for ant in ants: 
-        and_id = ant["identifier"] 
+        ant_id = ant["identifier"] 
         captured_food = ant["captured_food"] 
         anthill_id = ant["anthill_identifier"] 
         searching_food = not ant["has_food"] 
@@ -113,11 +113,10 @@ def INSERT_ANTS(
                 anthill_id=anthill_id 
         ) 
         # Update data if it already exists 
-        query += """CONSTRAINT (ant_id) 
+        query += """ON CONFLICT (ant_id) 
 DO 
     UPDATE SET captured_food = {captured_food}, 
-               searching_food = {searching_food} 
-    WHERE ant_id = '{ant_id}';\n""".format( 
+               searching_food = {searching_food};\n""".format( 
             captured_food=captured_food, 
             searching_food=searching_food, 
             ant_id=ant_id) 
@@ -147,14 +146,13 @@ def INSERT_FOODS(
                 food_id=food_id, 
                 initial_volume=initial_volume, 
                 current_volume=current_volume, 
-                scecnario_id=scenario_id
+                scenario_id=scenario_id
         ) 
 
         # Update data if it already exists 
-        query += """CONSTRAINT (food_id) 
+        query += """ON CONFLICT (food_id) 
 DO 
-    UPDATE SET current_volume = {current_volume}, 
-    WHERE food_id = '{food_id}';\n""".format( 
+    UPDATE SET current_volume = {current_volume};\n""".format( 
             food_id=food_id, 
             current_volume=current_volume) 
 
