@@ -34,7 +34,7 @@ DB_CREATE_ANTS = """CREATE TABLE IF NOT EXISTS ants (
     anthill_id INT, 
     CONSTRAINT fk_anthill 
         FOREIGN KEY(anthill_id) 
-            REFERENCES scenarios(anthill_id) 
+            REFERENCES anthills(anthill_id) 
 );""" 
 
 # Create table for the foods 
