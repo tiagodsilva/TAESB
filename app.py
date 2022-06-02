@@ -33,7 +33,11 @@ def read_table(tablename: str, database: str = "postgres"):
     return rdd 
 
 if __name__ == "__main__": 
+    start = time.time() 
     rdd = read_table("scenarios") 
+    elapsed = time.time() - start 
+    print("Table:", elapsed) 
+
     # Compute the proportion of ants searching for foods 
     start = time.time() 
     # avg = rdd.agg({"searching_food": "avg"}) 
