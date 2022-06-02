@@ -10,7 +10,12 @@ from .queries import DB_CREATE_SCENARIOS, \
         DB_CREATE_ANTHILLS, \
         DB_CREATE_ANTS, \
         DB_CREATE_FOODS, \
-        DROP_TABLES 
+        DROP_TABLES, \
+        INSERT_ANTS, \
+        INSERT_ANTHILLS, \
+        INSERT_FOODS, \
+        INSERT_SCENARIOS 
+
 import time 
 
 # Docs 
@@ -24,11 +29,12 @@ def current_foods(global_map: Dict):
     Compute the quantity of foods in each anthill. 
     """ 
     # Identify the anthills 
-    anthills = [anthill for anthill in global_map["anthills"]] 
-    # and the foods 
-    foods = [anthill["food_storage"] for anthill in anthills]
-    
-    return foods 
+    query = INSERT_SCENARIOS(global_map["scenario_id"]) 
+    print(query) 
+    cur = db_conn.cursor() 
+    cur.execute(query) 
+    cur.close() 
+    # db_conn.commit() 
 
 # Instantiate a connection to the database for 
 # each worker 
@@ -54,6 +60,7 @@ def init_worker(**kwargs):
     # Execute a query to create the tables 
     for db in [DB_CREATE_SCENARIOS, DB_CREATE_ANTHILLS, DB_CREATE_ANTS, DB_CREATE_FOODS]: 
         cur.execute(db) 
-        time.sleep(1) 
+        time.sleep(.1)  
+    cur.close() 
     # Commit the updates to the database 
     db_conn.commit() 

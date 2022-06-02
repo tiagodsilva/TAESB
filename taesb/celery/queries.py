@@ -11,17 +11,17 @@ DROP TABLE IF EXISTS foods CASCADE;"""
 
 # Create table for the scenarios 
 DB_CREATE_SCENARIOS = """CREATE TABLE IF NOT EXISTS scenarios ( 
-    scenario_id INT PRIMARY KEY, 
+    scenario_id VARCHAR(256) PRIMARY KEY, 
     execution_time INT DEFAULT NULL
 );""" 
 
 # Create table for the anthills  
 DB_CREATE_ANTHILLS = """CREATE TABLE IF NOT EXISTS anthills ( 
-    anthill_id INT PRIMARY KEY,
+    anthill_id VARCHAR(256) PRIMARY KEY,
     name VARCHAR (99) NOT NULL, 
     food_storage INT, 
     total_ants INT, 
-    scenario_id INT, 
+    scenario_id VARCHAR(256), 
     CONSTRAINT fk_scenario 
         FOREIGN KEY(scenario_id) 
             REFERENCES scenarios(scenario_id) 
@@ -29,10 +29,10 @@ DB_CREATE_ANTHILLS = """CREATE TABLE IF NOT EXISTS anthills (
 
 # Create table for the ants 
 DB_CREATE_ANTS = """CREATE TABLE IF NOT EXISTS ants ( 
-    ant_id INT PRIMARY KEY, 
+    ant_id VARCHAR(256) PRIMARY KEY, 
     captured_food INT, 
     searching_food BOOL, 
-    anthill_id INT, 
+    anthill_id VARCHAR(256), 
     CONSTRAINT fk_anthill 
         FOREIGN KEY(anthill_id) 
             REFERENCES anthills(anthill_id) 
@@ -40,18 +40,20 @@ DB_CREATE_ANTS = """CREATE TABLE IF NOT EXISTS ants (
 
 # Create table for the foods 
 DB_CREATE_FOODS = """CREATE TABLE IF NOT EXISTS foods ( 
-    food_id INT PRIMARY KEY, 
+    food_id VARCHAR(256) PRIMARY KEY, 
     initial_volume INT, 
     current_volume INT, 
-    scenario_id INT, 
+    scenario_id VARCHAR(256), 
     CONSTRAINT fk_scenario 
         FOREIGN KEY(scenario_id)  
             REFERENCES scenarios(scenario_id) 
 );""" 
 
 # Insert data into scenarios table 
-INSERT_SCENARIOS = lambda scenario_id: """INSERT INTO scenarios VALUES 
-    ({scenario_id})""".format(scenario_id=scenario_id) 
+INSERT_SCENARIOS = lambda scenario_id: """INSERT INTO scenarios  (scenario_id, execution_time) VALUES 
+    ('{scenario_id}', NULL) 
+ON CONFLICT (scenario_id) 
+DO NOTHING;""".format(scenario_id=scenario_id) 
 
 def INSERT_ANTHILLS( 
             anthills: List[Dict], 
@@ -70,17 +72,17 @@ def INSERT_ANTHILLS(
         total_ants = anthill["ants"] 
         query += "INSERT INTO anthills VALUES \n" 
         # Insert into data base if it not exists; else, update the value 
-        query += "({anthill_id}, {name}, {food_storage}, {total_ants}, {scenario_id})\n".format( 
+        query += "('{anthill_id}', '{name}', {food_storage}, {total_ants}, '{scenario_id}')\n".format( 
                 anthill_id=anthill_id, 
                 name=name,
                 food_storage=food_storage, 
                 total_ants=total_ants, 
                 scenario_id=scenario_id) 
         # Check if a register already exists; if so, update it 
-        query += """ON CONFLICT ({anthill_id}) 
+        query += """ON CONFLICT (anthill_id) 
     DO 
         UPDATE SET food_storage = {food_storage} 
-        WHERE anthill_id = {anthill_id};\n""".format( 
+        WHERE anthill_id = '{anthill_id}';\n""".format( 
                     food_storage=food_storage, 
                     anthill_id=anthill_id) 
     
@@ -104,18 +106,18 @@ def INSERT_ANTS(
 
         query += "INSERT INTO ants VALUES \n" 
         # Insert the instances 
-        query += "({ant_id}, {captured_food}, {searching_food}, {anthill_id}) \n".format( 
+        query += "('{ant_id}', {captured_food}, {searching_food}, '{anthill_id}') \n".format( 
                 ant_id=ant_id, 
                 captured_food=captured_food,
                 searching_food=searching_food,
                 anthill_id=anthill_id 
         ) 
         # Update data if it already exists 
-        query += """CONSTRAINT ({ant_id}) 
+        query += """CONSTRAINT (ant_id) 
 DO 
     UPDATE SET captured_food = {captured_food}, 
                searching_food = {searching_food} 
-    WHERE ant_id = {ant_id};\n""".format( 
+    WHERE ant_id = '{ant_id}';\n""".format( 
             captured_food=captured_food, 
             searching_food=searching_food, 
             ant_id=ant_id) 
@@ -141,7 +143,7 @@ def INSERT_FOODS(
         current_volume = food["current_volume"] 
 
         query += "INSERT INTO foods VALUES \n" 
-        query += "({food_id}, {initial_volume}, {current_volume}, {scenario_id})".format( 
+        query += "('{food_id}', {initial_volume}, {current_volume}, '{scenario_id}')".format( 
                 food_id=food_id, 
                 initial_volume=initial_volume, 
                 current_volume=current_volume, 
@@ -149,10 +151,10 @@ def INSERT_FOODS(
         ) 
 
         # Update data if it already exists 
-        query += """CONSTRAINT ({food_id}) 
+        query += """CONSTRAINT (food_id) 
 DO 
     UPDATE SET current_volume = {current_volume}, 
-    WHERE food_id = {food_id};\n""".format( 
+    WHERE food_id = '{food_id}';\n""".format( 
             food_id=food_id, 
             current_volume=current_volume) 
 
