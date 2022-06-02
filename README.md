@@ -68,7 +68,7 @@ CREATE USER {username} WITH PASSWORD '{password}';
 to instantiate an user. In Python, install the `psycopg2` package with 
 
 ``` 
-pip install python-psycopg2 
+pip install psycopg2-binary
 ``` 
 
 to access the database; the commands 
