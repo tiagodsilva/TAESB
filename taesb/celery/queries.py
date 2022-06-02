@@ -31,7 +31,7 @@ DB_CREATE_ANTHILLS = """CREATE TABLE IF NOT EXISTS anthills (
 DB_CREATE_ANTS = """CREATE TABLE IF NOT EXISTS ants ( 
     ant_id VARCHAR(256) PRIMARY KEY, 
     captured_food INT, 
-    searching_food BOOL, 
+    searching_food INT, 
     anthill_id VARCHAR(256), 
     CONSTRAINT fk_anthill 
         FOREIGN KEY(anthill_id) 
@@ -109,7 +109,7 @@ def INSERT_ANTS(
         query += "('{ant_id}', {captured_food}, {searching_food}, '{anthill_id}') \n".format( 
                 ant_id=ant_id, 
                 captured_food=captured_food,
-                searching_food=searching_food,
+                searching_food=int(searching_food),
                 anthill_id=anthill_id 
         ) 
         # Update data if it already exists 
@@ -118,7 +118,7 @@ DO
     UPDATE SET captured_food = {captured_food}, 
                searching_food = {searching_food};\n""".format( 
             captured_food=captured_food, 
-            searching_food=searching_food, 
+            searching_food=int(searching_food), 
             ant_id=ant_id) 
 
     # Return the query 

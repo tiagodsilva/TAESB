@@ -167,6 +167,9 @@ class Map(object):
         units of foods, it wins the simulation. 
         """ 
         # Execute the game 
+        if callbacks: 
+            callbacks.start(self) 
+
         while n_iterations is None or self.iteration < n_iterations: 
             # Each ant executes its movement 
             for ant in self.ants: 
@@ -190,7 +193,7 @@ class Map(object):
             self.iteration += 1 
             
             if callbacks: 
-                callbacks.execute(self) 
+                callbacks.stage_update(self) 
 
             if self.verbose: 
                 self.print() 

@@ -88,8 +88,13 @@ def main(args):
     Initialize the simulation. 
     """ 
     callbacks = taesb.CallbacksList( 
-            tasks.current_foods, 
-            tasks.update_database 
+          initialize = tasks.update_scenarios,      
+          callbacks = [tasks.current_foods, 
+            tasks.update_scenarios, 
+            tasks.update_ants, 
+            tasks.update_foods, 
+            tasks.update_anthills 
+        ] 
     ) 
 
     # Instantiate a map 

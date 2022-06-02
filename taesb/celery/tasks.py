@@ -23,29 +23,49 @@ from typing import Dict
 
 DEBUG = True 
 
-@app.task() 
-def update_database(global_map: Dict): 
+def execute_query(query: str): 
     """ 
-    Update the database. 
-    """  
-    scenario_id = global_map["scenario_id"] 
-    queries = [INSERT_SCENARIOS(scenario_id), 
-        INSERT_ANTHILLS(global_map["anthills"], scenario_id), 
-        INSERT_FOODS(global_map["foods"], scenario_id), 
-        INSERT_ANTS(global_map["ants"]) 
-    ] 
-    
+    Execute a query in the database. 
+    """ 
     # Instantiate a cursor 
     cur = db_conn.cursor() 
-    # Execute each query 
-    for query in queries: 
-        cur.execute(query) 
-
-    # And assert the execution 
+    # Execute the query 
+    cur.execute(query) 
+    # and commit the changes 
     cur.close() 
-
-    # Commit the updates 
     db_conn.commit() 
+
+@app.task() 
+def update_ants(global_map: Dict): 
+    """ 
+    Update the `ants` table. 
+    """ 
+    query = INSERT_ANTS(global_map["ants"]) 
+    execute_query(query) 
+
+@app.task() 
+def update_anthills(global_map: Dict): 
+    """ 
+    Update the `anthills` table. 
+    """ 
+    query = INSERT_ANTHILLS(global_map["anthills"], global_map["scenario_id"]) 
+    execute_query(query) 
+
+@app.task() 
+def update_scenarios(global_map: Dict): 
+    """  
+    Update the `scenarios` table. 
+    """ 
+    query = INSERT_SCENARIOS(global_map["scenario_id"]) 
+    execute_query(query) 
+
+@app.task() 
+def update_foods(global_map: Dict): 
+    """ 
+    Update the `foods` table. 
+    """ 
+    query = INSERT_FOODS(global_map["foods"], global_map["scenario_id"]) 
+    execute_query(query) 
 
 @app.task() 
 def current_foods(global_map: Dict): 
