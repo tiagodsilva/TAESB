@@ -79,6 +79,7 @@ import psycopg2
 conn = psycopg2.connect(database="postgres", 
 	user="{username}",
 	password="{password}" 
+) 
 ``` 
 	
 will provide you this access. 
