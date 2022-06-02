@@ -81,8 +81,8 @@ def INSERT_ANTHILLS(
 def INSERT_ANTS( 
         ant_ids: List[str], 
         captured_foods: List[int], 
-        searching_food: List[bool], 
-        scenario_id: List[int] 
+        searching_foods: List[bool], 
+        scenario_ids: List[int] 
     ): 
     """ 
     Insert data into the ants table. 
@@ -109,6 +109,41 @@ DO
             captured_food=captured_food, 
             searching_food=searching_food, 
             ant_id=ant_id) 
+
+    # Return the query 
+    return query 
+
+# Insert the foods into the food data set 
+def INSERT_FOODS( 
+        food_ids: List[str], 
+        initial_volumes: List[int], 
+        current_volumes: List[int], 
+        scenario_ids: List[int] 
+    ): 
+    """ 
+    Insert foods in the food data set table. 
+    """ 
+    # Initialize the query 
+    query = str() 
+    # Iterate across the attributes 
+    for (food_id, initial_volume, current_volume, scenario_id) in zip( 
+            food_ids, initial_volumes, current_volumes, scenario_ids): 
+        # Insert instances 
+        query += "INSERT INTO foods VALUES \n" 
+        query += "({food_id}, {initial_volume}, {current_volume}, {scenario_id})".format( 
+                food_id=food_id, 
+                initial_volume=initial_volume, 
+                current_volume=current_volume, 
+                scecnario_id=scenario_id
+        ) 
+
+        # Update data if it already exists 
+        query += """CONSTRAINT ({food_id}) 
+DO 
+    UPDATE SET current_volume = {current_volume}, 
+    WHERE food_id = {food_id};\n""".format( 
+            food_id=food_id, 
+            current_volume=current_volume) 
 
     # Return the query 
     return query 
