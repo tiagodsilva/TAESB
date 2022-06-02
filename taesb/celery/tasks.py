@@ -24,17 +24,42 @@ from typing import Dict
 DEBUG = True 
 
 @app.task() 
+def update_database(global_map: Dict): 
+    """ 
+    Update the database. 
+    """  
+    scenario_id = global_map["scenario_id"] 
+    queries = [INSERT_SCENARIOS(scenario_id), 
+            INSERT_ANTS(global_map["ants"]), 
+            INSERT_ANTHILLS(global_map["anthills"], scenario_id), 
+            INSERT_FOODS(global_map("foods"), scenario_id) 
+    ] 
+    
+    # Instantiate a cursor 
+    cur = db_conn.cursor() 
+
+    # Execute each query 
+    for query in queries: 
+        cur.execute(query) 
+
+    # And assert the execution 
+    cur.close() 
+
+    # Commit the updates 
+    db_conn.commit() 
+
+@app.task() 
 def current_foods(global_map: Dict): 
     """
     Compute the quantity of foods in each anthill. 
     """ 
     # Identify the anthills 
-    query = INSERT_SCENARIOS(global_map["scenario_id"]) 
-    print(query) 
-    cur = db_conn.cursor() 
-    cur.execute(query) 
-    cur.close() 
-    db_conn.commit() 
+    anthills = [anthill for anthill in global_map["anthills"]] 
+    # and the foods 
+    foods = [(anthill[["name"], anthill["food_storage"]) for anthill in anthills] 
+    
+    # Return the quantity of foods in each anthill 
+    return foods 
 
 # Instantiate a connection to the database for 
 # each worker 
