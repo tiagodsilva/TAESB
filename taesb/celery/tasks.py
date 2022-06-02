@@ -125,8 +125,8 @@ def init_worker(**kwargs):
 
     queries += [ 
             DB_CREATE_SCENARIOS, 
-            DB_CREATE_ANTS, 
             DB_CREATE_ANTHILLS, 
+            DB_CREATE_ANTS, 
             DB_CREATE_FOODS 
     ] 
     

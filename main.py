@@ -93,7 +93,7 @@ def main(args):
             tasks.update_scenarios, 
             tasks.update_anthills, 
             tasks.update_foods, 
-            tasks.update_anthills 
+            tasks.update_ants 
         ] 
     ) 
 
