@@ -89,4 +89,4 @@ You should, moreover, use a JDBC Driver to execute PostgreSQL query in Spark; fo
 wget https://jdbc.postgresql.org/download/postgresql-42.3.6.jar 
 ``` 
 
-and update the `read_table.py` lines.  
+and update the `app.py` lines.  
