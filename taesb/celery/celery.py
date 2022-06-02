@@ -12,6 +12,7 @@ from typing import Dict
 app = Celery( 
         "taesb", 
         broker="amqp://", 
+        backend="rpc://", 
         include=["taesb.celery.tasks"]
 ) 
 

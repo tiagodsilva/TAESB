@@ -91,7 +91,7 @@ def main(args):
           initialize = tasks.initialize_database,      
           callbacks = [tasks.current_foods, 
             tasks.update_scenarios, 
-            tasks.update_ants, 
+            tasks.update_anthills, 
             tasks.update_foods, 
             tasks.update_anthills 
         ] 

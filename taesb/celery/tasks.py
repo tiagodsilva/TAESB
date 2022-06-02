@@ -30,7 +30,7 @@ def execute_query(query: str):
     # Instantiate a cursor 
     cur = db_conn.cursor() 
     # Execute the query 
-    # cur.execute(query) 
+    cur.execute(query) 
     # and commit the changes 
     cur.close() 
     db_conn.commit() 
@@ -116,15 +116,22 @@ def init_worker(**kwargs):
             user="tiago",
             password="password" 
     ) 
-    cur = db_conn.cursor() 
-    
-    if DEBUG: 
-        cur.execute(DROP_TABLES) 
+    # Queries to execute 
+    queries = list() 
 
-    # Execute a query to create the tables 
-    for db in [DB_CREATE_SCENARIOS, DB_CREATE_ANTHILLS, DB_CREATE_ANTS, DB_CREATE_FOODS]: 
-        cur.execute(db) 
-        time.sleep(.1)  
-    cur.close() 
+    # If in debugging mode, drop tables 
+    if DEBUG: 
+        queries += [DROP_TABLES] 
+
+    queries += [ 
+            DB_CREATE_SCENARIOS, 
+            DB_CREATE_ANTS, 
+            DB_CREATE_ANTHILLS, 
+            DB_CREATE_FOODS 
+    ] 
+    
+    # Execute the joint query 
+    execute_query("\n".join(queries)) 
+
     # Commit the updates to the database 
     db_conn.commit() 
