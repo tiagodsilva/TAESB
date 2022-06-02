@@ -30,10 +30,30 @@ def execute_query(query: str):
     # Instantiate a cursor 
     cur = db_conn.cursor() 
     # Execute the query 
-    cur.execute(query) 
+    # cur.execute(query) 
     # and commit the changes 
     cur.close() 
     db_conn.commit() 
+
+@app.task() 
+def initialize_database(global_map: Dict): 
+    """ 
+    Initialize the database, inserting the instances and their keys; subsequent queries 
+    would be executed in parallel. 
+    """ 
+    scenario_id = global_map["scenario_id"] 
+    # Queries in a consistent order 
+    queries = [ 
+            INSERT_SCENARIOS(scenario_id), 
+            INSERT_ANTHILLS(global_map["anthills"], scenario_id), 
+            INSERT_FOODS(global_map["foods"], scenario_id), 
+            INSERT_ANTS(global_map["ants"]) 
+    ] 
+    print("\n".join(queries)) 
+    # Execute each query 
+    execute_query(
+            "\n".join(queries) 
+    ) 
 
 @app.task() 
 def update_ants(global_map: Dict): 

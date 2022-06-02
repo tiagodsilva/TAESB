@@ -88,7 +88,7 @@ def main(args):
     Initialize the simulation. 
     """ 
     callbacks = taesb.CallbacksList( 
-          initialize = tasks.update_scenarios,      
+          initialize = tasks.initialize_database,      
           callbacks = [tasks.current_foods, 
             tasks.update_scenarios, 
             tasks.update_ants, 
