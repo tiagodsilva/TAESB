@@ -83,3 +83,10 @@ conn = psycopg2.connect(database="postgres",
 	
 will provide you this access. 
 
+You should, moreover, use a JDBC Driver to execute PostgreSQL query in Spark; for this, execute 
+
+``` 
+wget https://jdbc.postgresql.org/download/postgresql-42.3.6.jar 
+``` 
+
+and update the `read_table.py` lines.  
