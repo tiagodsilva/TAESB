@@ -44,7 +44,7 @@ def initialize_database(global_map: Dict):
     scenario_id = global_map["scenario_id"] 
     # Queries in a consistent order 
     queries = [ 
-            INSERT_SCENARIOS(scenario_id), 
+            INSERT_SCENARIOS(scenario_id, global_map["execution_time"]), 
             INSERT_ANTHILLS(global_map["anthills"], scenario_id), 
             INSERT_FOODS(global_map["foods"], scenario_id), 
             INSERT_ANTS(global_map["ants"]) 
@@ -76,7 +76,7 @@ def update_scenarios(global_map: Dict):
     """  
     Update the `scenarios` table. 
     """ 
-    query = INSERT_SCENARIOS(global_map["scenario_id"]) 
+    query = INSERT_SCENARIOS(global_map["scenario_id"], global_map["execution_time"]) 
     execute_query(query) 
 
 @app.task() 

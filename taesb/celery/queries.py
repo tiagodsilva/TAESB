@@ -50,10 +50,13 @@ DB_CREATE_FOODS = """CREATE TABLE IF NOT EXISTS foods (
 );""" 
 
 # Insert data into scenarios table 
-INSERT_SCENARIOS = lambda scenario_id: """INSERT INTO scenarios  (scenario_id, execution_time) VALUES 
-    ('{scenario_id}', NULL) 
+INSERT_SCENARIOS = lambda scenario_id, execution_time: """INSERT INTO scenarios  (scenario_id, execution_time) VALUES 
+    ('{scenario_id}', {execution_time}) 
 ON CONFLICT (scenario_id) 
-DO NOTHING;""".format(scenario_id=scenario_id) 
+DO 
+    UPDATE SET execution_time = {execution_time};""".format(
+            scenario_id=scenario_id, 
+            execution_time=execution_time) 
 
 def INSERT_ANTHILLS( 
             anthills: List[Dict], 

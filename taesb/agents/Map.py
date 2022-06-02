@@ -1,7 +1,7 @@
 """ 
 Implement the Map class. 
 """ 
-from typing import List, Tuple, Dict, Any  
+from typing import List, Tuple, Dict, Any, Union 
 from .Anthill import Anthill
 from .Ant import Ant 
 from .Tile import Tile 
@@ -30,7 +30,7 @@ class Map(object):
     pheromones_lifetime: int 
     json: Dict[str, Any] 
     identifier: str 
-    execution_time: int 
+    execution_time: Union[int, str]  
 
     def __init__(self, 
             width: int, 
@@ -76,7 +76,7 @@ class Map(object):
             
         # The execution time of the scenario, measure with respect to the 
         # quantity of iterations 
-        self.execution_time = None 
+        self.execution_time = "NULL"
 
     def initialize_tiles(self, 
             anthills: List[Tuple[str, int, int, int]], 
@@ -203,6 +203,8 @@ class Map(object):
             if self.verbose: 
                 self.print() 
                 time.sleep(1)  
+        # Compute the execution time 
+        self.execution_time = self.iteration 
 
         # Update the database with the current data 
         callbacks.stage_update(self)  
