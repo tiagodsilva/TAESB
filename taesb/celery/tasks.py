@@ -6,7 +6,11 @@ from celery.signals import worker_process_init, worker_process_shutdown
 
 # Database 
 import psycopg2 
-from .queries import DB_CREATE_QUERY 
+from .queries import DB_CREATE_SCENARIOS, \
+        DB_CREATE_ANTHILLS, \
+        DB_CREATE_ANTS, \
+        DB_CREATE_FOODS 
+import time 
 
 # Docs 
 from typing import Dict 
@@ -42,7 +46,8 @@ def init_worker(**kwargs):
     cur = db_conn.cursor() 
     
     # Execute a query to create the tables 
-    cur.execute(DB_CREATE_QUERY)  
-    
+    for db in [DB_CREATE_SCENARIOS, DB_CREATE_ANTHILLS, DB_CREATE_ANTS, DB_CREATE_FOODS]: 
+        cur.execute(db) 
+        time.sleep(1) 
     # Commit the updates to the database 
     db_conn.commit() 
