@@ -78,3 +78,37 @@ def INSERT_ANTHILLS(
     # Return the query 
     return query 
 
+def INSERT_ANTS( 
+        ant_ids: List[str], 
+        captured_foods: List[int], 
+        searching_food: List[bool], 
+        scenario_id: List[int] 
+    ): 
+    """ 
+    Insert data into the ants table. 
+    """ 
+    # Initialize the query 
+    query = str() 
+    # Iterate across the attributes 
+    for (ant_id, captured_food, searching_food, scenario_id) in zip( 
+            ant_ids, captured_foods, searchgin_foods, scanerio_ids): 
+        query += "INSERT INTO ants VALUES \n" 
+        # Insert the instances 
+        query += "({ant_id}, {captured_food}, {searching_food}, {scenario_id}) \n".format( 
+                ant_id=ant_id, 
+                captured_food=captured_food,
+                searching_food=searching_food,
+                scenario_id=scenario_id 
+        ) 
+        # Update data if it already exists 
+        query += """CONSTRAINT ({ant_id}) 
+DO 
+    UPDATE SET captured_food = {captured_food}, 
+               searching_food = {searching_food} 
+    WHERE ant_id = {ant_id};\n""".format( 
+            captured_food=captured_food, 
+            searching_food=searching_food, 
+            ant_id=ant_id) 
+
+    # Return the query 
+    return query 
