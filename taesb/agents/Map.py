@@ -300,9 +300,12 @@ class Map(object):
         Serialize the map to JSON. 
         """ 
         # Serialize the foods 
+        self.json["scenario_id"] = self.identifier 
+
         self.json["foods"] = [{ 
             "loc": (x, y), 
-            "volume": self.foods[(x, y)].volume 
+            "volume": self.foods[(x, y)].volume, 
+            "identifier": self.foods[(x, y)].identifier 
         } for (x, y) in self.foods]
 
         # Serialize the anthills 
@@ -310,7 +313,8 @@ class Map(object):
             "loc": (x, y), 
             "food_storage": self.anthills[(x, y)].food_storage, 
             "name": self.anthills[(x, y)].name, 
-            "ants": self.anthills[(x, y)].initial_ants 
+            "ants": self.anthills[(x, y)].initial_ants, 
+            "identifier": self.anthills[(x, y)].identifier 
         } for (x, y) in self.anthills] 
 
         # Serialize the ants 
@@ -318,7 +322,8 @@ class Map(object):
             "loc": (int(ant.x_pos), int(ant.y_pos)), 
             "has_food": ant.has_food, 
             "captured_food": ant.captured_food, 
-            "colony_name": ant.colony.name 
+            "colony_name": ant.colony.name, 
+            "identifier": ant.identifier 
         } for ant in self.ants] 
         
         return self.json 
