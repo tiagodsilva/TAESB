@@ -5,9 +5,13 @@ Spark.
 # Sys 
 import pyspark 
 from pyspark.sql import SparkSession 
+import os 
 
 # Benchmarks 
 import time 
+
+# Docs 
+from typing import List 
 
 # Instantiate Spark session 
 spark = SparkSession \
@@ -32,7 +36,28 @@ def read_table(tablename: str, database: str = "postgres"):
 
     return rdd 
 
+def write_csvs(tablenames: List[str], 
+        output_dir: str = "dummy_data"): 
+    """ 
+    Write CSVs for the tables in the PostgreSQL. 
+    """ 
+    # Check if output_dir exists 
+    if not os.path.exists(output_dir): 
+        os.mkdir(output_dir) 
+    
+    # Write the tables as CSVs 
+    for tablename in tablenames: 
+        # Identify table 
+        rdd = read_table(tablename) 
+        pandas_df = rdd.toPandas() 
+        pandas_df.to_csv(os.path.join( 
+            output_dir, tablename + ".csv" 
+        )) 
+    
 if __name__ == "__main__": 
+    write_csvs(["anthills", "ants", "scenarios", 
+        "foods"]) 
+
     start = time.time() 
     rdd = read_table("scenarios") 
     elapsed = time.time() - start 
