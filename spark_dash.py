@@ -7,7 +7,7 @@ import pyspark
 from pyspark.sql import SparkSession 
 import plotly.graph_objs as go
 # importing"read_table" function from data.py file
-from data import read_table
+from app import read_table
 
 
 #####################################################################
@@ -28,7 +28,8 @@ app.title = 'TAESB Dash with Spark'
 
 # Generating any plot
 # TODO: fill the following 'x' and 'y' parameters with the desired columns of the dataframe
-trace = go.Bar(x=<rdd.column>, y=<rdd.column>, name='Some plot')
+data_frame = rdd.toPandas() 
+trace = go.Bar(x=data_frame["scenario_id"], y=data_frame["execution_time"], name='Some plot')
  
 
 # Creating basic definition of the app layout
