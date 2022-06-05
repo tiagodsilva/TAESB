@@ -5,6 +5,9 @@ from .celery import app
 from celery.signals import worker_process_init, worker_process_shutdown 
 from celery.schedules import crontab 
 
+import pyspark 
+from pyspark.sql import SparkSession 
+
 # Database 
 import psycopg2 
 from .queries import DB_CREATE_SCENARIOS, \
@@ -119,6 +122,9 @@ def current_foods(global_map: Dict):
 # each worker 
 db_conn = None 
 
+# And a spark session for the periodic transformations in the ETL 
+spark_session = None 
+
 @worker_process_init.connect 
 def init_worker(**kwargs): 
     """ 
@@ -147,9 +153,19 @@ def init_worker(**kwargs):
     
     # Execute the joint query 
     execute_query("\n".join(queries)) 
-
+    
     # Commit the updates to the database 
     db_conn.commit() 
+
+    # Instantiate the spark session 
+    spark_session = SparkSession \
+            .builder \
+            .appName("Ant Empire") \
+            .config("spark.jars", "postgresql-42.3.6.jar") \
+            .getOrCreate() 
+    # Update the spark's logging 
+    sc = pyspark.SparkContext.getOrCreate() 
+    sc.setLogLevel("FATAL") 
 
 @app.task() 
 def update_stats(): 
@@ -157,4 +173,4 @@ def update_stats():
     Update the appropriate data in the analytical database. 
     """ 
     print("Update the database, Luke!") 
-
+    print(spark_session) 
