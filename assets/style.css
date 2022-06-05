@@ -1,0 +1,22 @@
+.layout {
+    display: flex;
+}
+
+.page-header {
+    font-family: 'Roboto-Slab, serif';
+}
+
+#example-graph {
+    background-color: red;
+}
+
+.first-plot {
+    background-color: red;
+    width: 48%;
+}
+
+.second-plot {
+    color:cyan;
+    background-color: gray;
+    width: 48%;
+}
