@@ -24,6 +24,20 @@ from typing import Dict
 
 DEBUG = True 
 
+# Periodic tasks 
+app.conf.update( 
+        {
+            "beat_max_loop_interval": 1, 
+            "beat_schedule": { 
+                "update_stats": { 
+                    "task": "taesb.celery.tasks.update_stats", 
+                    "schedule": 5
+                }
+            } 
+        } 
+) 
+
+
 def execute_query(query: str): 
     """ 
     Execute a query in the database. 
@@ -119,7 +133,7 @@ def init_worker(**kwargs):
     ) 
     # Queries to execute 
     queries = list() 
-
+    
     # If in debugging mode, drop tables 
     if DEBUG: 
         queries += [DROP_TABLES] 
@@ -136,15 +150,6 @@ def init_worker(**kwargs):
 
     # Commit the updates to the database 
     db_conn.commit() 
-
-# Periodic task 
-@app.on_after_finalize.connect 
-def setup_periodic_tasks(sender, **kwargs): 
-    """ 
-    Generate periodic tasks; `sender` is the current worker. 
-    """ 
-    # Insert a periodic task to update the database 
-    sender.add_periodic_task(crontab(minute=.3), update_stats.s()) 
 
 @app.task() 
 def update_stats(): 
