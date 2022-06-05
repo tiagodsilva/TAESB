@@ -23,7 +23,7 @@ rdd = read_table("scenarios")
 # PLOTLY DASH APP
 #####################################################################
 app_name = 'dash-sparksqlExample'
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, external_stylesheets=["https://fonts.googleapis.com/css?family=Source+Sans+Pro|Roboto+Slab"])
 app.title = 'TAESB Dash with Spark'
 
 # Generating any plot
@@ -32,17 +32,39 @@ data_frame = rdd.toPandas()
 trace = go.Bar(x=data_frame["scenario_id"], y=data_frame["execution_time"], name='Some plot')
  
 
-# Creating basic definition of the app layout
-# The app layout is highly customizable
-app.layout = html.Div(children=[html.H1("TAESB Dash with Spark", style={'textAlign': 'center'}),
-    dcc.Graph(
-    id='example-graph',
-    figure={
-    'data': [trace],
-    'layout':
-    go.Layout(title='Spark Data', barmode='stack')
-    })
-    ], className="container")
+# Here we are creating the first plot, which will be located at left 
+plot_1 = html.Div( className="first-plot",
+    children=[
+        dcc.Graph(
+        id='example-graph',
+        figure={
+        'data': [trace],
+        'layout':
+        go.Layout(title='Spark Data', barmode='stack')
+        })
+    ])
+
+# Here we are creating the second 'plot', which will be located at right
+# TODO: create the second visualization :)
+plot_2 = html.Div(className='second-plot',
+        children=html.H1("Second plot here"))
+
+# Preparing the app layout
+layout = html.Div(className="layout",
+    children=[
+        plot_1,
+        plot_2
+    ])
+
+# Adding to the app the layout previously created
+# The app layout is highly customizable 
+app.layout = html.Div(
+    id="main-div",
+    children= [
+        html.H1("TAESB Dash with Spark", className = "page-header", style={'textAlign': 'center'}),# page header
+        layout],
+
+)
  
 if __name__ == '__main__':
     app.run_server(debug=True)
