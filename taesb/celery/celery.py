@@ -16,5 +16,7 @@ app = Celery(
         include=["taesb.celery.tasks"]
 ) 
 
+app.autodiscover_tasks() 
+
 if __name__ == "__main__": 
     app.start()
