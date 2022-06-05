@@ -65,10 +65,10 @@ DB_CREATE_STATS = """CREATE TABLE IF NOT EXISTS stats (
     slw_scenario_time INT, 
     avg_ant_food INT, 
     max_ant_food INT, 
-    CONSTRAINT fk_scenario 
+    CONSTRAINT fk_fst_scenario 
         FOREIGN KEY(fst_scenario_id) 
             REFERENCES scenarios(scenario_id), 
-    CONSTRAINT fk_scenario 
+    CONSTRAINT fk_slw_scenario 
         FOREIGN KEY(slw_scenario_id) 
             REFERENCES scenarios(scenario_id) 
 )""" 

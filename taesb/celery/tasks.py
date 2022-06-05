@@ -149,7 +149,8 @@ def init_worker(**kwargs):
             DB_CREATE_SCENARIOS, 
             DB_CREATE_ANTHILLS, 
             DB_CREATE_ANTS, 
-            DB_CREATE_FOODS 
+            DB_CREATE_FOODS, 
+            DB_CREATE_STATS 
     ] 
     
     # Execute the joint query 
@@ -158,7 +159,7 @@ def init_worker(**kwargs):
     # Commit the updates to the database 
     db_conn.commit() 
 
-    # Instantiate the spark session 
+    # Instantiate (possibly get, if it already exists) the spark session 
     spark_session = SparkSession \
             .builder \
             .appName("Ant Empire") \

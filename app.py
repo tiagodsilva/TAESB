@@ -20,7 +20,7 @@ spark = SparkSession \
         .config("spark.jars", "postgresql-42.3.6.jar") \
         .getOrCreate() 
 
-def read_table(tablename: str, database: str = "postgres"): 
+def read_table(tablename: str, query: str, database: str = "postgres"): 
     """ 
     Read a table from the database `adatabase`. 
     """ 
@@ -28,12 +28,29 @@ def read_table(tablename: str, database: str = "postgres"):
             .format("jdbc") \
             .option("url", "jdbc:postgresql://localhost:5432/{database}".format( 
                 database=database)) \
-            .option("dbtable", "{tablename}".format(tablename=tablename)) \
+            .option("table", "{tablename}".format(tablename=tablename)) \
             .option("user", "tiago") \
             .option("password", "password") \
             .option("driver", "org.postgresql.Driver") \
             .load() 
 
+    return rdd 
+
+def query_db(query: str, database: str = "postgres"): 
+    """ 
+    Read a table correspondent to the query `query`. 
+    """
+    rdd = spark.read 
+        .format("jdbc") 
+        .option("url", "jdbc:postgresql://localhost:5432/{database}".format( 
+            database=database)) \
+        .option("table", "{tablename}".format(tablename=tablename)) \
+        .option("user", "tiago") 
+        .option("password", "password") \
+        .option("driver", "org.postgresql.Driver") \
+        .load() 
+    
+    # Return the resilient and distributed data set 
     return rdd 
 
 def write_csvs(tablenames: List[str], 
@@ -59,7 +76,7 @@ if __name__ == "__main__":
         "foods"]) 
 
     start = time.time() 
-    rdd = read_table("scenarios") 
+    rdd = read_table("stats") 
     elapsed = time.time() - start 
     print("Table:", elapsed) 
 
