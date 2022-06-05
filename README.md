@@ -31,7 +31,7 @@ chmod +x redis.sh
 to initialize Redis. In this sense, use the command 
 
 ``` 
-celery -A taesb worker --loglevel=INFO 
+celery -A taesb beat --loglevel=INFO 
 ``` 
 
 at the root directory of this repository to start the program. Execute, in the next step, 

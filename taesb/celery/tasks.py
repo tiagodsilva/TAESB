@@ -3,6 +3,7 @@ Implement the Celery's tasks.
 """ 
 from .celery import app 
 from celery.signals import worker_process_init, worker_process_shutdown 
+from celery.schedules import crontab 
 
 # Database 
 import psycopg2 
@@ -135,3 +136,20 @@ def init_worker(**kwargs):
 
     # Commit the updates to the database 
     db_conn.commit() 
+
+# Periodic task 
+@app.on_after_finalize.connect 
+def setup_periodic_tasks(sender, **kwargs): 
+    """ 
+    Generate periodic tasks; `sender` is the current worker. 
+    """ 
+    # Insert a periodic task to update the database 
+    sender.add_periodic_task(crontab(minute=.3), update_stats.s()) 
+
+@app.task() 
+def update_stats(): 
+    """ 
+    Update the appropriate data in the analytical database. 
+    """ 
+    print("Update the database, Luke!") 
+
