@@ -237,14 +237,14 @@ def update_stats():
                 max_ant_food=max_ant_food 
         )
 
-        print(total_foods) 
+        # print(total_foods) 
     except TypeError as err: 
         # There are no instances in the table 
-        print(err) 
+        # print(err) 
         pass 
     except IndexError as err: 
         # There are no instances in the anthill tables 
-        print(err) 
+        # print(err) 
         pass 
     
 
