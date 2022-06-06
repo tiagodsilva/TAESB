@@ -33,9 +33,8 @@ class CallbacksList(object):
         Execute callbacks on start of a simulation. 
         """ 
         json_map = global_map.to_json() 
-        task = self.initialize.delay(json_map) 
-        # Wait for the insertion of the data 
-        task.wait(timeout=None, interval=.5) 
+        task = self.initialize.apply_async((json_map,), 
+                priority=9) 
 
     def stage_update(self, global_map: 'Map'): # Forward reference 
         """ 
@@ -44,4 +43,5 @@ class CallbacksList(object):
         # Serialize map 
         json_map = global_map.to_json() 
         for callback in self.callbacks: 
-            callback.delay(json_map) 
+            callback.apply_async((json_map,), 
+                    priority=0) 

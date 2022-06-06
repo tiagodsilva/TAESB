@@ -13,7 +13,6 @@ from typing import Dict
 app = CelerySpark( 
         main="taesb", 
         broker="amqp://", 
-        backend="rpc://", 
         include=["taesb.celery.tasks"]
 ) 
 app.autodiscover_tasks() 
