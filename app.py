@@ -5,6 +5,7 @@ Spark.
 # Sys 
 import pyspark 
 from pyspark.sql import SparkSession 
+from pyspark.sql import functions as F 
 import os 
 
 # Benchmarks 
@@ -20,7 +21,7 @@ spark = SparkSession \
         .config("spark.jars", "postgresql-42.3.6.jar") \
         .getOrCreate() 
 
-def read_table(tablename: str, query: str, database: str = "postgres"): 
+def read_table(tablename: str, database: str = "postgres"): 
     """ 
     Read a table from the database `adatabase`. 
     """ 
@@ -28,7 +29,7 @@ def read_table(tablename: str, query: str, database: str = "postgres"):
             .format("jdbc") \
             .option("url", "jdbc:postgresql://localhost:5432/{database}".format( 
                 database=database)) \
-            .option("table", "{tablename}".format(tablename=tablename)) \
+            .option("dbtable", "{tablename}".format(tablename=tablename)) \
             .option("user", "tiago") \
             .option("password", "password") \
             .option("driver", "org.postgresql.Driver") \
@@ -40,12 +41,12 @@ def query_db(query: str, database: str = "postgres"):
     """ 
     Read a table correspondent to the query `query`. 
     """
-    rdd = spark.read 
-        .format("jdbc") 
+    rdd = spark.read \
+        .format("jdbc") \
         .option("url", "jdbc:postgresql://localhost:5432/{database}".format( 
             database=database)) \
-        .option("table", "{tablename}".format(tablename=tablename)) \
-        .option("user", "tiago") 
+        .option("query", query) \
+        .option("user", "tiago") \
         .option("password", "password") \
         .option("driver", "org.postgresql.Driver") \
         .load() 
@@ -74,18 +75,24 @@ def write_csvs(tablenames: List[str],
 if __name__ == "__main__": 
     write_csvs(["anthills", "ants", "scenarios", 
         "foods"]) 
+    
+    anthills = read_table("anthills") 
+    ants = read_table("ants") 
+    scenarios = read_table("scenarios") 
 
-    start = time.time() 
-    rdd = read_table("stats") 
-    elapsed = time.time() - start 
-    print("Table:", elapsed) 
+    # Ants in active anthills 
+    active_ants = ants.join( 
+            anthills, 
+            anthills.anthill_id == ants.anthill_id, 
+            "inner" 
+    ) 
+    active_ants = active_ants.join( 
+            scenarios, 
+            scenarios.scenario_id == active_ants.scenario_id,
+            "inner" 
+    ) 
+    active_ants = active_ants.filter( 
+            active_ants.active == 1 
+    ) 
 
-    # Compute the proportion of ants searching for foods 
-    start = time.time() 
-    # avg = rdd.agg({"searching_food": "avg"}) 
-    elapsed = time.time() - start 
-    print("Elasped", elapsed) 
-    # print(avg.show()) 
-    print(rdd.show()) 
-
-
+    active_ants.show() 

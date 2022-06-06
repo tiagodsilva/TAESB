@@ -1,4 +1,2 @@
-,scenario_id,execution_time
-0,d89b463d-fd76-4682-bc80-cb4134f662d6,364
-1,1ef425b8-c553-4817-9274-95f5dbadfe86,394
-2,623ae3b4-7fda-48d0-8b57-bb1af38aa3a4,393
+,scenario_id,execution_time,active
+0,23948727-64f6-4bb6-8c76-db69f002f78b,135,1

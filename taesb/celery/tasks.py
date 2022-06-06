@@ -176,14 +176,15 @@ def update_stats():
                 .collect() 
 
         # Quantity of foods in transit 
-        foods_in_transit = ants - ants_searching_food 
+        foods_in_transit = ants - ants_searching_food[0][0]
         # Quantity of foods in the anthills 
         foods_in_anthills = tables["anthills"] \
                 .agg(F.sum("food_storage")) \
                 .collect() 
 
         # Quantity of foods in total 
-        total_foods = foods_deposit[0][0] + foods_in_transit[0][0] + foods_in_anthills[0][0] 
+        total_foods = foods_deposit[0][0] + foods_in_transit + foods_in_anthills[0][0] 
+
         
         print(total_foods) 
     except TypeError as err: 
