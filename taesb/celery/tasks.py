@@ -143,7 +143,7 @@ def update_stats():
     """ 
     Update the appropriate data in the analytical database. 
     """ 
-    print("Update the database, Luke!") 
+    # print("Update the database, Luke!") 
     # Read the tables 
     tables_names = ["ants", "anthills", "foods", "scenarios"] 
         
@@ -156,7 +156,7 @@ def update_stats():
     for table in tables: 
         tables[table] = app.read_table(table) 
 
-    print(tables) 
+    # print(tables) 
     
     # Compute the desired statistics 
     try: 
@@ -206,7 +206,7 @@ def update_stats():
                 .tail(1)[0] \
                 .asDict()  
         
-        print(fst_scenario, slw_scenario) 
+        # print(fst_scenario, slw_scenario) 
 
         fst_scenario_id, fst_scenario_time = fst_scenario["scenario_id"], \
                 fst_scenario["execution_time"] 
