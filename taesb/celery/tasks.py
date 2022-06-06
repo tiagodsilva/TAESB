@@ -54,7 +54,7 @@ def initialize_database(global_map: Dict):
     scenario_id = global_map["scenario_id"] 
     # Queries in a consistent order 
     queries = [ 
-            INSERT_SCENARIOS(scenario_id, global_map["execution_time"]), 
+            INSERT_SCENARIOS(scenario_id, global_map["execution_time"], global_map["active"]), 
             INSERT_ANTHILLS(global_map["anthills"], scenario_id), 
             INSERT_FOODS(global_map["foods"], scenario_id), 
             INSERT_ANTS(global_map["ants"]) 
