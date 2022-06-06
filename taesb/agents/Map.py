@@ -315,8 +315,8 @@ class Map(object):
         # Serialize the foods 
         self.json["scenario_id"] = self.identifier 
         self.json["execution_time"] = self.iteration 
-        self.json["active"] = int(self.execution_time is not None) 
-
+        self.json["active"] = int(self.execution_time is None) 
+    
         self.json["foods"] = [{ 
             "loc": (x, y), 
             "current_volume": self.foods[(x, y)].volume, 

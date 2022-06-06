@@ -132,29 +132,30 @@ class CelerySpark(Celery):
         """ 
         # Write the query 
         query = """INSERT INTO stats 
-        (1, scenarios, anthills, ants_searching_food, ants, 
-        food_anthills, foods_in_deposit, execution_time, 
+        (stat_id, scenarios, anthills, ants_searching_food, ants, 
+        foods_in_anthills, foods_in_deposit, avg_execution_time, 
         fst_scenario_id, fst_scenario_time, 
         slw_scenario_id, slw_scenario_time, 
         avg_ant_food, max_ant_food) 
 VALUES 
-        ({scenarios}, {anthills}, {ants_searching_food}, 
+        (1, {scenarios}, {anthills}, {ants_searching_food}, 
         {ants}, {foods_in_anthills}, {foods_in_deposit}, 
-        {avg_execution_time}, {fst_scenario_id}, {fst_scenario_time}, 
-        {slw_scenario_id}, {slw_scenario_time}, {avg_ant_food}, 
+        {avg_execution_time}, '{fst_scenario_id}', {fst_scenario_time}, 
+        '{slw_scenario_id}', {slw_scenario_time}, {avg_ant_food}, 
         {max_ant_food}) 
-CONFLICT (stat_id) 
+ON CONFLICT (stat_id) 
+    DO 
         UPDATE SET scenarios = {scenarios}, 
                    anthills = {anthills}, 
                    ants_searching_food = {ants_searching_food}, 
                    ants = {ants}, 
-                   foods_anthills = {foods_in_anthills}, 
+                   foods_in_anthills = {foods_in_anthills}, 
                    foods_in_deposit = {foods_in_deposit}, 
-                   execution_time = {execution_time}, 
-                   fst_scenario_id = {fst_scenario_id}, 
+                   avg_execution_time = {avg_execution_time}, 
+                   fst_scenario_id = '{fst_scenario_id}', 
                    fst_scenario_time = {fst_scenario_time}, 
-                   slw_scenario_id = {slw_scenario_id}, 
-                   slw_scenario_time = {slw_scenatio_time}, 
+                   slw_scenario_id = '{slw_scenario_id}', 
+                   slw_scenario_time = {slw_scenario_time}, 
                    avg_ant_food = {avg_ant_food}, 
                    max_ant_food = {max_ant_food};""".format( 
                            scenarios=scenarios,

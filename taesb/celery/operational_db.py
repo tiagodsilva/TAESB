@@ -51,19 +51,19 @@ DB_CREATE_FOODS = """CREATE TABLE IF NOT EXISTS foods (
 
 # Create tabke for the statistics
 VIEW_CREATE_STATS = """CREATE TABLE IF NOT EXISTS stats (
-    stat_id INT PRIMARY KEY DEFAULT 1,
+    stat_id INT PRIMARY KEY,
     scenarios INT,
     anthills INT,
     ants_searching_food INT,
     ants INT,
-    food_anthills INT,
-    food INT,
-    execution_time INT,
+    foods_in_anthills INT,
+    foods_in_deposit INT,
+    avg_execution_time INT,
     fst_scenario_id VARCHAR(256),
     fst_scenario_time INT,
     slw_scenario_id VARCHAR(256),
     slw_scenario_time INT,
-    avg_ant_food INT,
+    avg_ant_food FLOAT,
     max_ant_food INT,
     CONSTRAINT fk_fst_scenario
         FOREIGN KEY(fst_scenario_id)
