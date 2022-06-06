@@ -5,8 +5,11 @@ from .celery import app
 from celery.signals import worker_process_init, worker_process_shutdown 
 from celery.schedules import crontab 
 
+from ..utils import CallbacksList 
+
 import pyspark 
 from pyspark.sql import SparkSession 
+import pyspark.sql.functions as F 
 
 # Database 
 import psycopg2 
@@ -41,19 +44,6 @@ app.conf.update(
         } 
 ) 
 
-
-def execute_query(query: str): 
-    """ 
-    Execute a query in the database. 
-    """ 
-    # Instantiate a cursor 
-    cur = db_conn.cursor() 
-    # Execute the query 
-    cur.execute(query) 
-    # and commit the changes 
-    cur.close() 
-    db_conn.commit() 
-
 @app.task() 
 def initialize_database(global_map: Dict): 
     """ 
@@ -70,7 +60,7 @@ def initialize_database(global_map: Dict):
     ] 
     print("\n".join(queries)) 
     # Execute each query 
-    execute_query(
+    app.execute_query(
             "\n".join(queries) 
     ) 
 
@@ -80,7 +70,7 @@ def update_ants(global_map: Dict):
     Update the `ants` table. 
     """ 
     query = INSERT_ANTS(global_map["ants"]) 
-    execute_query(query) 
+    app.execute_query(query) 
 
 @app.task() 
 def update_anthills(global_map: Dict): 
@@ -88,7 +78,7 @@ def update_anthills(global_map: Dict):
     Update the `anthills` table. 
     """ 
     query = INSERT_ANTHILLS(global_map["anthills"], global_map["scenario_id"]) 
-    execute_query(query) 
+    app.execute_query(query) 
 
 @app.task() 
 def update_scenarios(global_map: Dict): 
@@ -96,7 +86,7 @@ def update_scenarios(global_map: Dict):
     Update the `scenarios` table. 
     """ 
     query = INSERT_SCENARIOS(global_map["scenario_id"], global_map["execution_time"]) 
-    execute_query(query) 
+    app.execute_query(query) 
 
 @app.task() 
 def update_foods(global_map: Dict): 
@@ -104,7 +94,7 @@ def update_foods(global_map: Dict):
     Update the `foods` table. 
     """ 
     query = INSERT_FOODS(global_map["foods"], global_map["scenario_id"]) 
-    execute_query(query) 
+    app.execute_query(query) 
 
 @app.task() 
 def current_foods(global_map: Dict): 
@@ -119,26 +109,12 @@ def current_foods(global_map: Dict):
     # Return the quantity of foods in each anthill 
     return foods 
 
-# Instantiate a connection to the database for 
-# each worker 
-db_conn = None 
-
-# And a spark session for the periodic transformations in the ETL 
-spark_session = None 
-
 @worker_process_init.connect 
 def init_worker(**kwargs): 
     """ 
     Instantiate a connection to the data base. 
     """ 
-    global db_conn 
     print("Initializing connection to the database") 
-    db_conn = psycopg2.connect( 
-            database="postgres",
-            user="tiago",
-            password="password" 
-    ) 
-    # Queries to execute 
     queries = list() 
     
     # If in debugging mode, drop tables 
@@ -153,21 +129,12 @@ def init_worker(**kwargs):
             DB_CREATE_STATS 
     ] 
     
-    # Execute the joint query 
-    execute_query("\n".join(queries)) 
-    
-    # Commit the updates to the database 
-    db_conn.commit() 
-
-    # Instantiate (possibly get, if it already exists) the spark session 
-    spark_session = SparkSession \
-            .builder \
-            .appName("Ant Empire") \
-            .config("spark.jars", "postgresql-42.3.6.jar") \
-            .getOrCreate() 
-    # Update the spark's logging 
-    sc = pyspark.SparkContext.getOrCreate() 
-    sc.setLogLevel("FATAL") 
+    app._init_database( 
+            database="postgres", 
+            user="tiago", 
+            password="password", 
+            queries=queries 
+    ) 
 
 @app.task() 
 def update_stats(): 
@@ -175,4 +142,41 @@ def update_stats():
     Update the appropriate data in the analytical database. 
     """ 
     print("Update the database, Luke!") 
-    print(spark_session) 
+    # Read the tables 
+    tables_names = ["ants", "anthills", "foods", "scenarios"] 
+        
+    # And instantiate a container for the data frames 
+    tables = { 
+            dbtable:None for dbtable in tables_names 
+    } 
+    
+    # Iterate across the tables 
+    for table in tables: 
+        tables[table] = app.read_table(table) 
+
+    print(tables) 
+    
+    # Compute the desired statistics 
+    try: 
+        scenarios = tables["scenarios"].count() 
+        anthills = tables["scenarios"].count() 
+
+        # Quantity of foods available at the food deposits 
+        foods_deposit = tables["foods"].agg(F.sum("current_volume")).collect()[0][0] 
+        # Quantity of ants alive 
+        ants = tables["ants"].count()
+        # Quantity of ants searching for food 
+        ants_searching_food = tables["ants"].agg(F.sum("searching_food")).collect()[0][0] 
+        # Quantity of foods in transit 
+        foods_in_transit = ants - ants_searching_food 
+        # Quantity of foods in the anthills 
+        foods_in_anthills = tables["anthills"].agg(F.sum("food_storage")).collect()[0][0] 
+        # Quantity of foods in total 
+        total_foods = foods_deposit + foods_in_transit + foods_in_anthills
+        
+        print(total_foods) 
+    except TypeError as err: 
+        # There are no instances in the table 
+        pass 
+    
+

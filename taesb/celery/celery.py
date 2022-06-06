@@ -2,6 +2,7 @@
 Implement the features of the Flask application. 
 """ 
 from celery import Celery 
+from ..utils.CelerySpark import CelerySpark 
 
 import os 
 
@@ -9,8 +10,8 @@ import os
 from typing import Dict 
 
 # Instantiate a flask application 
-app = Celery( 
-        "taesb", 
+app = CelerySpark( 
+        main="taesb", 
         broker="amqp://", 
         backend="rpc://", 
         include=["taesb.celery.tasks"]
