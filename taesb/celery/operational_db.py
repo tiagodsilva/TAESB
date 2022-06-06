@@ -11,7 +11,8 @@ DROP TABLE IF EXISTS stats CASCADE;"""
 # Create table for the scenarios 
 DB_CREATE_SCENARIOS = """CREATE TABLE IF NOT EXISTS scenarios ( 
     scenario_id VARCHAR(256) PRIMARY KEY, 
-    execution_time INT DEFAULT NULL
+    execution_time INT DEFAULT NULL, 
+    active INT DEFAULT 1 
 );""" 
 
 # Create table for the anthills  
