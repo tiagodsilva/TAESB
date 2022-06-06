@@ -48,11 +48,23 @@ plot_2 = html.Div(className='second-plot',
         children=html.H1("Second plot here", 
             id="antsStats"))
 
+# Container for the buttons 
+buttons = html.Div([ 
+    html.Div( 
+        id="containerButtons", 
+    ), 
+    dcc.Interval( 
+        id="intervalButtons", 
+        interval=5e3, 
+        n_intervals=0 
+    ) 
+]) 
+
 # Preparing the app layout
 layout = html.Div(className="layout",
     children=[
         plot_1,
-        plot_2
+        plot_2, 
     ])
 
 # Adding to the app the layout previously created
@@ -61,8 +73,14 @@ app.layout = html.Div(
     id="main-div",
     children= [
         html.H1("TAESB Dash with Spark", className = "page-header", style={'textAlign': 'center'}),# page header
-        layout],
-
+        html.Div( 
+            children=[
+                layout, 
+                buttons
+            ]
+        ) 
+        ],
+    
 )
 
 @app.callback(Output("antsFood", "figure"), 
@@ -86,6 +104,25 @@ def update_graph_live(n: int):
             'layout':
             go.Layout(title='Spark Data', barmode='stack')
         }
+
+@app.callback(Output("containerButtons", "children"), 
+        Input("intervalButtons", "n_intervals")) 
+def update_buttons(n_intervals: int): 
+    """ 
+    Update the buttons. 
+    """ 
+    # Capture the anthills 
+    anthills = read_table("anthills") \
+            .select("anthill_id") \
+            .distinct() \
+            .collect() 
+
+    # Return the buttons 
+    return [ 
+            html.Button(identifier, 
+                id=identifier[0] + "button") \
+                    for identifier in anthills 
+    ] 
 
 if __name__ == '__main__':
     app.run_server(debug=True)
