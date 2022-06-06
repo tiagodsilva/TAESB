@@ -82,9 +82,10 @@ class CelerySpark(Celery):
         """ 
         # Query a table in the database 
         rdd = self.spark_session \
+                .read \
                 .format("jdbc") \
                 .option("url", self.db_url) \
-                .optoin("table", tablename) \
+                .option("dbtable", tablename) \
                 .option("user", "tiago") \
                 .option("password", "password") \
                 .option("driver", "org.postgresql.Driver") \
@@ -98,12 +99,13 @@ class CelerySpark(Celery):
         Capture a registers with a query in the database. 
         """ 
         rdd = self.spark_session \
+                .read \
                 .format("jdbc") \
                 .option("url", self.db_url) \
                 .optoin("query", "query") \
                 .option("user", "tiago") \
                 .option("password", "password") \
-                .option("driver", "org.postgresql.Driver") 
+                .option("driver", "org.postgresql.Driver") \
                 .load() 
 
         # Return the resilient and distributed data set 

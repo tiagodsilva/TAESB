@@ -315,6 +315,7 @@ class Map(object):
         # Serialize the foods 
         self.json["scenario_id"] = self.identifier 
         self.json["execution_time"] = self.execution_time 
+        self.json["active"] = int(self.execution_time is not None) 
 
         self.json["foods"] = [{ 
             "loc": (x, y), 

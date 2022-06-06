@@ -86,7 +86,8 @@ def update_scenarios(global_map: Dict):
     """  
     Update the `scenarios` table. 
     """ 
-    query = INSERT_SCENARIOS(global_map["scenario_id"], global_map["execution_time"]) 
+    query = INSERT_SCENARIOS(global_map["scenario_id"], global_map["execution_time"], 
+            global_map["active"]) 
     app.execute_query(query) 
 
 @app.task() 

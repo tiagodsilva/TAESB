@@ -4,13 +4,15 @@ Implement queries for the database.
 from typing import List, Dict 
 
 # Insert data into scenarios table 
-INSERT_SCENARIOS = lambda scenario_id, execution_time: """INSERT INTO scenarios  (scenario_id, execution_time) VALUES 
-    ('{scenario_id}', {execution_time}) 
+INSERT_SCENARIOS = lambda scenario_id, execution_time, active: """INSERT INTO scenarios  (scenario_id, execution_time, active) VALUES 
+    ('{scenario_id}', {execution_time}, {active}) 
 ON CONFLICT (scenario_id) 
 DO 
-    UPDATE SET execution_time = {execution_time};""".format(
+    UPDATE SET execution_time = {execution_time}, 
+               active = {active};""".format(
             scenario_id=scenario_id, 
-            execution_time=execution_time) 
+            execution_time=execution_time, 
+            active=active) 
 
 def INSERT_ANTHILLS( 
             anthills: List[Dict], 
