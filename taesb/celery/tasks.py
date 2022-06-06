@@ -17,7 +17,7 @@ from .operational_db import DB_CREATE_SCENARIOS, \
         DB_CREATE_ANTHILLS, \
         DB_CREATE_ANTS, \
         DB_CREATE_FOODS, \
-        DB_CREATE_STATS, \
+        VIEW_CREATE_STATS, \
         DROP_TABLES 
 
 from .dml import INSERT_ANTS, \
@@ -35,7 +35,7 @@ DEBUG = True
 # Periodic tasks 
 app.conf.update( 
         {
-            "beat_max_loop_interval": 1, 
+            "beat_max_loop_interval": 5, 
             "beat_schedule": { 
                 "update_stats": { 
                     "task": "taesb.celery.tasks.update_stats", 
@@ -128,7 +128,7 @@ def init_worker(**kwargs):
             DB_CREATE_ANTHILLS, 
             DB_CREATE_ANTS, 
             DB_CREATE_FOODS, 
-            DB_CREATE_STATS 
+            VIEW_CREATE_STATS 
     ] 
     
     app._init_database( 
@@ -164,21 +164,31 @@ def update_stats():
         anthills = tables["scenarios"].count() 
 
         # Quantity of foods available at the food deposits 
-        foods_deposit = tables["foods"].agg(F.sum("current_volume")).collect()[0][0] 
+        foods_deposit = tables["foods"] \
+                .agg(F.sum("current_volume")) \
+                .collect() 
+
         # Quantity of ants alive 
         ants = tables["ants"].count()
         # Quantity of ants searching for food 
-        ants_searching_food = tables["ants"].agg(F.sum("searching_food")).collect()[0][0] 
+        ants_searching_food = tables["ants"] \
+                .agg(F.sum("searching_food")) \
+                .collect() 
+
         # Quantity of foods in transit 
         foods_in_transit = ants - ants_searching_food 
         # Quantity of foods in the anthills 
-        foods_in_anthills = tables["anthills"].agg(F.sum("food_storage")).collect()[0][0] 
+        foods_in_anthills = tables["anthills"] \
+                .agg(F.sum("food_storage")) \
+                .collect() 
+
         # Quantity of foods in total 
-        total_foods = foods_deposit + foods_in_transit + foods_in_anthills
+        total_foods = foods_deposit[0][0] + foods_in_transit[0][0] + foods_in_anthills[0][0] 
         
         print(total_foods) 
     except TypeError as err: 
         # There are no instances in the table 
+        print(err) 
         pass 
     
 

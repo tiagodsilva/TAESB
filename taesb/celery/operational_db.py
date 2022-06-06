@@ -50,7 +50,7 @@ DB_CREATE_FOODS = """CREATE TABLE IF NOT EXISTS foods (
 );""" 
 
 # Create tabke for the statistics
-DB_CREATE_STATS = """CREATE TABLE IF NOT EXISTS stats (
+VIEW_CREATE_STATS = """CREATE TABLE IF NOT EXISTS stats (
     stat_id INT PRIMARY KEY,
     n_scenarios INT,
     n_anthills INT,
