@@ -13,13 +13,14 @@ import pyspark.sql.functions as F
 
 # Database 
 import psycopg2 
-from .queries import DB_CREATE_SCENARIOS, \
+from .operational_db import DB_CREATE_SCENARIOS, \
         DB_CREATE_ANTHILLS, \
         DB_CREATE_ANTS, \
         DB_CREATE_FOODS, \
         DB_CREATE_STATS, \
-        DROP_TABLES, \
-        INSERT_ANTS, \
+        DROP_TABLES 
+
+from .dml import INSERT_ANTS, \
         INSERT_ANTHILLS, \
         INSERT_FOODS, \
         INSERT_SCENARIOS 
