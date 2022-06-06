@@ -185,7 +185,22 @@ def update_stats():
         # Quantity of foods in total 
         total_foods = foods_deposit[0][0] + foods_in_transit + foods_in_anthills[0][0] 
 
-        
+        app.update_stats(
+                scenarios=scenarios, 
+                anthills=anthills,
+                ants_searching_food=ants_searching_food
+                ants=ants, 
+                foods_in_anthills=foods_in_anthills,
+                foods_in_deposit=foods_in_deposit,
+                avg_execution_time=avg_execution_time,
+                fst_scenario_id=fst_scenario_id,
+                fst_scenario_time=fst_scenario_time,
+                slw_scenario_id=slw_scenario_id,
+                slw_scenario_time=slw_scenario_time,
+                avg_ant_food=anv_ant_food,
+                max_ant_food=max_ant_food 
+        )
+
         print(total_foods) 
     except TypeError as err: 
         # There are no instances in the table 
