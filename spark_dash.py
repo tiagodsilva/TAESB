@@ -49,16 +49,30 @@ plot_2 = html.Div(className='second-plot',
             id="antsStats"))
 
 # Container for the buttons 
-buttons = html.Div([ 
-    html.Div( 
-        id="containerButtons", 
-    ), 
-    dcc.Interval( 
-        id="intervalButtons", 
-        interval=5e3, 
-        n_intervals=0 
-    ) 
-]) 
+
+magnifier = html.Div(
+    children=[ 
+        html.Div( 
+            id="scenarios", 
+            children=[ 
+            # Update the options periodically 
+            html.Div([ 
+                dcc.Dropdown( 
+                    ["NULL"], 
+                    "NULL", 
+                    id="availableScenarios"
+            ), 
+                dcc.Interval( 
+                    id="intervalSelect", 
+                    interval=5e3, 
+                    n_intervals=0 
+            ) 
+        ]), 
+        html.Div( 
+            id="magnify", 
+        )
+    ]) 
+])
 
 # Preparing the app layout
 layout = html.Div(className="layout",
@@ -76,7 +90,7 @@ app.layout = html.Div(
         html.Div( 
             children=[
                 layout, 
-                buttons
+                magnifier
             ]
         ) 
         ],
@@ -105,24 +119,46 @@ def update_graph_live(n: int):
             go.Layout(title='Spark Data', barmode='stack')
         }
 
-@app.callback(Output("containerButtons", "children"), 
-        Input("intervalButtons", "n_intervals")) 
+@app.callback(Output("availableScenarios", "options"), 
+        [Input("intervalSelect", "n_intervals")]) 
 def update_buttons(n_intervals: int): 
     """ 
     Update the buttons. 
     """ 
     # Capture the anthills 
-    anthills = read_table("anthills") \
-            .select("anthill_id") \
+    scenarios = read_table("scenarios") \
+            .select("scenario_id") \
             .distinct() \
             .collect() 
 
     # Return the buttons 
-    return [ 
-            html.Button(identifier, 
-                id=identifier[0] + "button") \
-                    for identifier in anthills 
-    ] 
+    return ["NULL"] + [identifier[0] for identifier in scenarios] 
+
+@app.callback( 
+        Output("magnify", "children"), 
+        Input("availableScenarios", "value") 
+) 
+def update_scenario(value: str): 
+    """ 
+    Update the display of the current scenario. 
+    """ 
+    # Check if a scenario was chosen  
+    if value == "NULL": 
+        return list() 
+
+    # If it was chosen, compute its data 
+    data = read_table("scenarios") 
+    curr_scenario = data \
+        .filter(data["scenario_id"] == value) \
+        .collect()[0] 
+
+    # Check if the scenario is in execution 
+    if curr_scenario[2] == 1: 
+        return "This scenario is in execution, with {it} iterations".format( 
+                it=curr_scenario[1]) 
+
+    return "This scenario was executed in {it} iterations!".format( 
+            it=curr_scenario[1]) 
 
 if __name__ == '__main__':
     app.run_server(debug=True)
