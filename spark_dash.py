@@ -49,7 +49,7 @@ plot_2 = html.Div(className='second-plot',
             html.Div("Second plot here", id="antsStats"), 
             dcc.Interval( 
                 id="antsStatsInterval", 
-                interval=5e3, 
+                interval=1e3, 
                 n_intervals=0 
             ) 
         ])
@@ -132,7 +132,11 @@ def update_dash_stats(n_intervals: int):
     Update the displayed stats in the Dash application; it is a text. 
     """ 
     # Identify the data in the data base 
-    stats = read_table("stats").toPandas().iloc[-1, :]
+    try: 
+        stats = read_table("stats").toPandas().iloc[-1, :]
+    except IndexError:
+        # There are no instances in the data set currently 
+        return list() 
 
     # Instantiate a string to display the appropriate quantities 
     info = """The current application contemplates 

@@ -39,7 +39,7 @@ app.conf.update(
             "beat_schedule": { 
                 "update_stats": { 
                     "task": "taesb.celery.tasks.update_stats", 
-                    "schedule": 5
+                    "schedule": 1
                 }
             } 
         } 
