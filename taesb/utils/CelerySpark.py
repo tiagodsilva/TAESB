@@ -9,9 +9,13 @@ import glob
 # Applications 
 from celery import Celery 
 import pyspark 
-from pyspark.sql import SparkSession 
+from pyspark.sql import SparkSession, \
+        functions as F 
 
 import psycopg2 
+
+# IO 
+import warnings 
 
 class CelerySpark(Celery): 
     """ 
@@ -58,7 +62,10 @@ class CelerySpark(Celery):
                 .builder \
                 .appName(self.app_name) \
                 .config("spark.jars", "postgresql-42.3.6.jar") \
-                .getOrCreate() 
+                .config("spark.master", "local[8]") \
+                .config("spark.ui.enabled", "false") \
+                .config("spark.driver.host", "localhost") \
+                .getOrCreate() # Use multiple processes 
 
         # Update spark's logging 
         sc = pyspark.SparkContext.getOrCreate() 
