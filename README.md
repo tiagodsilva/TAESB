@@ -56,7 +56,7 @@ to enjoy root access to the data base. In this scenario, execute
 
 ``` 
 psql
-CREATE USER {username} WITH PASSWORD '{password}'; 
+CREATE USER {username} WITH PASSWORD '{password}'; # Your username! 
 ``` 
 
 to instantiate an user. In Python, install the `psycopg2` package with 
