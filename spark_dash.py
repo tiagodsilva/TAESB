@@ -46,10 +46,10 @@ plot_1 = html.Div(className="first-plot",
 # TODO: create the second visualization :)
 plot_2 = html.Div(className='second-plot',
         children=[ 
-            html.H1("Second plot here", id="antsStats"), 
+            html.Div("Second plot here", id="antsStats"), 
             dcc.Interval( 
                 id="antsStatsInterval", 
-                interval=1e3, 
+                interval=5e3, 
                 n_intervals=0 
             ) 
         ])
@@ -124,6 +124,53 @@ def update_graph_live(n: int):
             'layout':
             go.Layout(title='Spark Data', barmode='stack')
         }
+
+@app.callback(Output("antsStats", "children"), 
+        Input("antsStatsInterval", "n_intervals")) 
+def update_dash_stats(n_intervals: int): 
+    """ 
+    Update the displayed stats in the Dash application; it is a text. 
+    """ 
+    # Identify the data in the data base 
+    stats = read_table("stats").toPandas().iloc[-1, :]
+
+    # Instantiate a string to display the appropriate quantities 
+    info = """The current application contemplates 
+    + {scenarios} scenario(s), 
+    + {anthills} anthill(s), 
+    + {ants} ants, with {antssf} searching foods, 
+    + {foods_in_anthills} foods in anthills, 
+    + {foods_in_deposit} foods in deposits, 
+    + {foods_in_transit} foods in transit. 
+
+Also, {avg_execution_time} was the average execution time, 
+while {fst_scenario_id} was the 
+shortest scenario, with 
+{fst_scenario_time} iterations; 
+{slw_scenario_id}, however, 
+was the longest, with {slw_scenario_time} 
+iterations needed. Each ant brings, 
+in this sense, {avg_ant_food} units in average 
+to their anthills, but the most 
+voracious ant provided {max_ant_food} 
+units to its own anthill.""".format( 
+            scenarios=stats["scenarios"], 
+            anthills=stats["anthills"], 
+            ants=stats["ants"], 
+            antssf=stats["ants_searching_food"], 
+            foods_in_anthills=stats["foods_in_anthills"], 
+            foods_in_deposit=stats["foods_in_deposit"], 
+            foods_in_transit=stats["ants"] - stats["ants_searching_food"], 
+            avg_execution_time=stats["avg_execution_time"], 
+            fst_scenario_id=stats["fst_scenario_id"], 
+            fst_scenario_time=stats["fst_scenario_time"], 
+            slw_scenario_id=stats["slw_scenario_id"], 
+            slw_scenario_time=stats["slw_scenario_time"], 
+            avg_ant_food=stats["avg_ant_food"], 
+            max_ant_food=stats["max_ant_food"] 
+    ) 
+    
+    return html.Pre(info) 
 
 @app.callback(Output("availableScenarios", "options"), 
         [Input("intervalSelect", "n_intervals")]) 
