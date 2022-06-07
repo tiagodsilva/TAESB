@@ -138,7 +138,7 @@ def init_worker(**kwargs):
             queries=queries 
     ) 
 
-@app.task() 
+@app.task(priority=8) 
 def update_stats(): 
     """ 
     Update the appropriate data in the analytical database. 
@@ -161,7 +161,7 @@ def update_stats():
     # Compute the desired statistics 
     try: 
         scenarios = tables["scenarios"].count() 
-        anthills = tables["scenarios"].count() 
+        anthills = tables["anthills"].count() 
 
         # Quantity of foods available at the food deposits 
         foods_in_deposit = tables["foods"] \
