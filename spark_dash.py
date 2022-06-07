@@ -45,8 +45,14 @@ plot_1 = html.Div(className="first-plot",
 # Here we are creating the second 'plot', which will be located at right
 # TODO: create the second visualization :)
 plot_2 = html.Div(className='second-plot',
-        children=html.H1("Second plot here", 
-            id="antsStats"))
+        children=[ 
+            html.H1("Second plot here", id="antsStats"), 
+            dcc.Interval( 
+                id="antsStatsInterval", 
+                interval=1e3, 
+                n_intervals=0 
+            ) 
+        ])
 
 # Container for the buttons 
 
@@ -151,14 +157,35 @@ def update_scenario(value: str):
     curr_scenario = data \
         .filter(data["scenario_id"] == value) \
         .collect()[0] 
+   
+    # Identify the anthills in the current scenario 
+    anthills = read_table("anthills") 
+    anthills = anthills \
+            .filter(anthills.scenario_id == value) 
+    
+    # Compute the quantity of anthills 
+    quantity_anthills = anthills.count() 
+    # Execution time 
+    execution_time = curr_scenario[1] 
 
-    # Check if the scenario is in execution 
-    if curr_scenario[2] == 1: 
-        return "This scenario is in execution, with {it} iterations".format( 
-                it=curr_scenario[1]) 
+    # Identify the ants in this scenario 
+    ants = read_table("ants") 
+    
+    ants = ants \
+            .join(anthills, anthills.anthill_id == ants.anthill_id) 
+           
+    # Scenario's information 
+    info = """This scenario contains 
+    + {anthills} anthills, 
+    + {ants} ants, 
+and it was executed for {execution_time} iterations.
+    """.format( 
+            anthills=quantity_anthills,
+            ants=ants.count(),
+            execution_time=execution_time) 
 
-    return "This scenario was executed in {it} iterations!".format( 
-            it=curr_scenario[1]) 
+    # Return the scenario's information 
+    return html.Pre(info)  
 
 if __name__ == '__main__':
     app.run_server(debug=True)
