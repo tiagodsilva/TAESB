@@ -19,6 +19,9 @@ spark = SparkSession \
         .builder \
         .appName("Ant Empire") \
         .config("spark.jars", "postgresql-42.3.6.jar") \
+        .config("spark.master", "local[8]") \
+        .config("spark.ui.enable", "false") \
+        .config("spark.driver.host", "localhost") \
         .getOrCreate() 
 
 def read_table(tablename: str, database: str = "postgres"): 
