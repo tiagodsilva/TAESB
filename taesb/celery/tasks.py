@@ -138,6 +138,15 @@ def init_worker(**kwargs):
             queries=queries 
     ) 
 
+@worker_process_shutdown.connect 
+def shutdown_worker(**kwargs): 
+    """ 
+    Shutdown the workers. 
+    """ 
+    # Update data base access 
+    print("Shutdown worker") 
+    app.db_conn.close() 
+
 @app.task(priority=8) 
 def update_stats(): 
     """ 
