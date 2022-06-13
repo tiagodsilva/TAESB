@@ -10,10 +10,10 @@ import os
 from typing import Dict 
 
 # Instantiate a flask application 
+broker_url = "amqps://username:passwordpassword@b-7182fca9-4c07-4bfa-be01-72310cb18d60.mq.us-east-1.amazonaws.com:5671"
 app = CelerySpark( 
         main="taesb", 
-        broker=\
-                "amqps://TJG:passwordpassword@b-30957be3-40c4-4c26-9193-8bcdead4625c.mq.us-east-1.amazonaws.com:5671",
+        broker=broker_url, 
         include=["taesb.celery.tasks"]
 )
 app.autodiscover_tasks() 
