@@ -33,17 +33,18 @@ from typing import Dict
 DEBUG = True 
 
 # Periodic tasks 
-app.conf.update( 
-        {
-            "beat_max_loop_interval": 5, 
-            "beat_schedule": { 
-                "update_stats": { 
-                    "task": "taesb.celery.tasks.update_stats", 
-                    "schedule": 1
-                }
-            } 
-        } 
-) 
+#app.conf.update( 
+#        {
+#            "beat_max_loop_interval": 5, 
+#            "beat_schedule": { 
+#                "update_stats": { 
+#                    "task": "taesb.celery.tasks.update_stats", 
+#                    "schedule": 1
+#                }
+#            } 
+#        } 
+#) 
+#
 
 @app.task() 
 def initialize_database(global_map: Dict): 

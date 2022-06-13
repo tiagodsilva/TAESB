@@ -17,7 +17,7 @@ import psycopg2
 # IO 
 import warnings 
 
-class CelerySpark(Celery): 
+class CeleryPostgres(Celery): 
     """ 
     A class that assembles Celery and Spark. 
     """ 
@@ -57,20 +57,6 @@ class CelerySpark(Celery):
         # Execute the queries 
         self.execute_query("\n".join(queries)) 
 
-        # Get (or create) the current Spark session 
-        self.spark_session = SparkSession \
-                .builder \
-                .appName(self.app_name) \
-                .config("spark.jars", "postgresql-42.3.6.jar") \
-                .config("spark.master", "local[8]") \
-                .config("spark.ui.enabled", "false") \
-                .config("spark.driver.host", "localhost") \
-                .getOrCreate() # Use multiple processes 
-
-        # Update spark's logging 
-        sc = pyspark.SparkContext.getOrCreate() 
-        sc.setLogLevel("FATAL") 
-
     def execute_query(self, query: str): 
         """ 
         Execute a query in the data base pointed by `db_conn`. 
@@ -82,41 +68,6 @@ class CelerySpark(Celery):
         # and commit the changes 
         cur.close() 
         self.db_conn.commit() 
-    
-    def read_table(self, tablename: str): 
-        """ 
-        Capture a data table from the database. 
-        """ 
-        # Query a table in the database 
-        rdd = self.spark_session \
-                .read \
-                .format("jdbc") \
-                .option("url", self.db_url) \
-                .option("dbtable", tablename) \
-                .option("user", "tiago") \
-                .option("password", "password") \
-                .option("driver", "org.postgresql.Driver") \
-                .load() 
-
-        # Return the resilient and distributed data set
-        return rdd 
-    
-    def query_db(self, query: str): 
-        """ 
-        Capture a registers with a query in the database. 
-        """ 
-        rdd = self.spark_session \
-                .read \
-                .format("jdbc") \
-                .option("url", self.db_url) \
-                .optoin("query", "query") \
-                .option("user", "tiago") \
-                .option("password", "password") \
-                .option("driver", "org.postgresql.Driver") \
-                .load() 
-
-        # Return the resilient and distributed data set 
-        return rdd 
 
     def update_stats(self, 
             scenarios: int, 
