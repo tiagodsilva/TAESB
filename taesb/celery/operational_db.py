@@ -58,6 +58,8 @@ VIEW_CREATE_STATS = """CREATE TABLE IF NOT EXISTS stats (
     ants INT,
     foods_in_anthills INT,
     foods_in_deposit INT,
+    foods_in_transit INT, 
+    foods_total INT, 
     avg_execution_time INT,
     fst_scenario_id VARCHAR(256),
     fst_scenario_time INT,

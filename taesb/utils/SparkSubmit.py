@@ -12,7 +12,7 @@ from pyspark.sql import SparkSession
 import pyspark.sql.functions as F 
 from pyspark.conf import SparkConf 
 
-import psycopg 
+import psycopg2 
 import time 
 import json 
 
@@ -65,7 +65,7 @@ class ScheduleSpark(object):
         Initialize the data base. 
         """ 
         # Initialize the access to the data base 
-        self.db_conn = pyscopg2.connect( 
+        self.db_conn = psycopg2.connect( 
                 database=self.database_name, 
                 user=self.database_auth["user"], 
                 password=self.database_auth["password"] 
@@ -96,13 +96,15 @@ class ScheduleSpark(object):
         # Return the data frame 
         return dataframe 
 
-     def _update_query(self, 
+    def _update_query(self, 
             scenarios: int, 
             anthills: int, 
             ants_searching_food: int, 
             ants: int, 
             foods_in_anthills: int, 
             foods_in_deposit: int, 
+            foods_in_transit: int, 
+            foods_total: int, 
             avg_execution_time: int, 
             fst_scenario_id: str, 
             fst_scenario_time: int, 
@@ -117,16 +119,38 @@ class ScheduleSpark(object):
         """ 
         # Write the query 
         query = """INSERT INTO stats 
-        (stat_id, scenarios, anthills, ants_searching_food, ants, 
-        foods_in_anthills, foods_in_deposit, avg_execution_time, 
-        fst_scenario_id, fst_scenario_time, 
-        slw_scenario_id, slw_scenario_time, 
-        avg_ant_food, max_ant_food) 
+        (stat_id, 
+        scenarios, 
+        anthills, 
+        ants_searching_food, 
+        ants, 
+        foods_in_anthills, 
+        foods_in_deposit, 
+        foods_in_transit, 
+        foods_total, 
+        avg_execution_time, 
+        fst_scenario_id, 
+        fst_scenario_time, 
+        slw_scenario_id, 
+        slw_scenario_time, 
+        avg_ant_food, 
+        max_ant_food) 
 VALUES 
-        (1, {scenarios}, {anthills}, {ants_searching_food}, 
-        {ants}, {foods_in_anthills}, {foods_in_deposit}, 
-        {avg_execution_time}, '{fst_scenario_id}', {fst_scenario_time}, 
-        '{slw_scenario_id}', {slw_scenario_time}, {avg_ant_food}, 
+        (1, 
+        {scenarios}, 
+        {anthills}, 
+        {ants_searching_food}, 
+        {ants}, 
+        {foods_in_anthills}, 
+        {foods_in_deposit}, 
+        {foods_in_transit}, 
+        {foods_total}, 
+        {avg_execution_time}, 
+        '{fst_scenario_id}', 
+        {fst_scenario_time}, 
+        '{slw_scenario_id}', 
+        {slw_scenario_time}, 
+        {avg_ant_food}, 
         {max_ant_food}) 
 ON CONFLICT (stat_id) 
     DO 
@@ -136,6 +160,8 @@ ON CONFLICT (stat_id)
                    ants = {ants}, 
                    foods_in_anthills = {foods_in_anthills}, 
                    foods_in_deposit = {foods_in_deposit}, 
+                   foods_in_transit = {foods_in_transit}, 
+                   foods_total = {foods_total}, 
                    avg_execution_time = {avg_execution_time}, 
                    fst_scenario_id = '{fst_scenario_id}', 
                    fst_scenario_time = {fst_scenario_time}, 
@@ -149,6 +175,8 @@ ON CONFLICT (stat_id)
                            ants=ants,
                            foods_in_anthills=foods_in_anthills,
                            foods_in_deposit=foods_in_deposit, 
+                           foods_in_transit=foods_in_transit, 
+                           foods_total=foods_total, 
                            avg_execution_time=avg_execution_time,
                            fst_scenario_id=fst_scenario_id,
                            fst_scenario_time=fst_scenario_time, 
@@ -180,7 +208,7 @@ ON CONFLICT (stat_id)
 
         # Iterate across the tables
         for table in tables:
-            tables[table] = app.read_table(table)
+            tables[table] = self.read_table(table)
 
         # print(tables)
 
@@ -193,10 +221,12 @@ ON CONFLICT (stat_id)
                     anthills_tn=anthills_tn, 
                     foods_tn=foods_tn, 
                     scenarios_tn=scenarios_tn) 
-        except IndexError: 
+        except IndexError as err: 
+            print("[ERROR]: {err}".format(err=err))
             # There are no instances in the table 
             return  
-        except TypeError: 
+        except TypeError as err: 
+            print("[ERROR]: {err}".format(err=err)) 
             # sum `NoneType` with an integer 
             return 
 
@@ -204,7 +234,7 @@ ON CONFLICT (stat_id)
 
     def compute_stats(self, 
             tables: Dict[str, pyspark.sql.DataFrame], 
-            ants_fn: str, 
+            ants_tn: str, 
             anthills_tn: str, 
             foods_tn: str, 
             scenarios_tn: str): 
@@ -220,7 +250,7 @@ ON CONFLICT (stat_id)
         data["anthills"] = tables[anthills_tn].count() 
         
         # and the quantity of foods in deposit 
-        data["foods_in_deposity"] = tables[foods_tn] \
+        data["foods_in_deposit"] = tables[foods_tn] \
                 .agg(F.sum("current_volume")) \
                 .collect()[0][0] 
 
@@ -240,7 +270,7 @@ ON CONFLICT (stat_id)
                 .collect()[0][0] 
 
         # Quantity of foods in total 
-        data["total_foods"] = data["foods_in_deposit"] + data["foods_in_transit"] + \
+        data["foods_total"] = data["foods_in_deposit"] + data["foods_in_transit"] + \
                 data["foods_in_anthills"] 
         
         # Capture inactive scenarios 
@@ -269,7 +299,7 @@ ON CONFLICT (stat_id)
         data["slw_scenario_time"] = slw_scenario["execution_time"] 
 
         # Check the ants that captured foods 
-        ants_foods = tables[ants_fn] \
+        ants_foods = tables[ants_tn] \
                 .agg(F.avg("captured_food"), F.max("captured_food")) \
                 .collect()[0] 
 
@@ -287,7 +317,8 @@ ON CONFLICT (stat_id)
         start = time.time() 
         # Execute until timeout 
         while True: 
-            if time.time() % start == stamp: 
+            if (time.time() - start) %  stamp ==  0: 
+                print("[INFO]: Execute query") 
                 # Update the data base 
                 self.update_stats() # Should compute the quantities 
             
@@ -306,7 +337,8 @@ if __name__ == "__main__":
         database_auth = json.load(stream) 
 
     database_name = "postgres" 
-    database_url = "jdbc:postgresql://localhost:5432/{database}".format(database=database) 
+    database_url = "jdbc:postgresql://localhost:5432/{database}" \
+            .format(database=database_name) 
         
     # Instantiate a session for Spark 
     spark = ScheduleSpark("taesb", 
@@ -316,5 +348,5 @@ if __name__ == "__main__":
             database_auth 
     ) 
     
-    spark.schedule(stamp=5, timeout=29) 
+    spark.schedule(stamp=5) 
    
