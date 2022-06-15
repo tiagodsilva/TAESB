@@ -17,7 +17,9 @@ from .operational_db import DB_CREATE_SCENARIOS, \
         DB_CREATE_ANTHILLS, \
         DB_CREATE_ANTS, \
         DB_CREATE_FOODS, \
-        VIEW_CREATE_STATS, \
+        DB_CREATE_GLOBAL, \
+        DB_CREATE_LOCAL, \
+        DB_CREATE_ATOMIC, \
         DROP_TABLES 
 
 from .dml import INSERT_ANTS, \
@@ -31,20 +33,6 @@ import time
 from typing import Dict 
 
 DEBUG = True 
-
-# Periodic tasks 
-#app.conf.update( 
-#        {
-#            "beat_max_loop_interval": 5, 
-#            "beat_schedule": { 
-#                "update_stats": { 
-#                    "task": "taesb.celery.tasks.update_stats", 
-#                    "schedule": 1
-#                }
-#            } 
-#        } 
-#) 
-#
 
 @app.task() 
 def initialize_database(global_map: Dict): 
@@ -129,7 +117,9 @@ def init_worker(**kwargs):
             DB_CREATE_ANTHILLS, 
             DB_CREATE_ANTS, 
             DB_CREATE_FOODS, 
-            VIEW_CREATE_STATS 
+            DB_CREATE_GLOBAL, 
+            DB_CREATE_LOCAL, 
+            DB_CREATE_ATOMIC 
     ] 
     
     app._init_database( 

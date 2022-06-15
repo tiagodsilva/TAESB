@@ -6,7 +6,9 @@ DROP_TABLES = """DROP TABLE IF EXISTS scenarios CASCADE;
 DROP TABLE IF EXISTS anthills CASCADE; 
 DROP TABLE IF EXISTS ants CASCADE; 
 DROP TABLE IF EXISTS foods CASCADE; 
-DROP TABLE IF EXISTS stats CASCADE;""" 
+DROP TABLE IF EXISTS stats_global CASCADE; 
+DROP TABLE IF EXISTS stats_local CASCADE; 
+DROP TABLE IF EXISTS stats_atomic CASCADE;""" 
 
 # Create table for the scenarios 
 DB_CREATE_SCENARIOS = """CREATE TABLE IF NOT EXISTS scenarios ( 
@@ -73,10 +75,10 @@ DB_CREATE_GLOBAL = """CREATE TABLE IF NOT EXISTS stats_global (
     CONSTRAINT fk_slw_scenario
         FOREIGN KEY(slw_scenario_id)
             REFERENCES scenarios(scenario_id)
-)"""
+);"""
 
 # Create table for local statistics 
-DB_CREATE_LOCAL = """CREATE TABLE IF NOT EXITS stats_local ( 
+DB_CREATE_LOCAL = """CREATE TABLE IF NOT EXISTS stats_local ( 
     scenario_id VARCHAR(256) PRIMARY KEY, 
     n_anthills INT, 
     n_ants INT, 
@@ -85,7 +87,7 @@ DB_CREATE_LOCAL = """CREATE TABLE IF NOT EXITS stats_local (
     CONSTRAINT fk_scenario_id 
         FOREIGN KEY(scenario_id) 
             REFERENCES scenarios(scenario_id) 
-)""" 
+);""" 
 
 # Create table for atomic statistics 
 DB_CREATE_ATOMIC = """CREATE TABLE IF NOT EXISTS stats_atomic ( 
@@ -95,7 +97,7 @@ DB_CREATE_ATOMIC = """CREATE TABLE IF NOT EXISTS stats_atomic (
     n_ants_searching_food INT, 
     foods_deposit INT, 
     foods_in_transit INT, 
-    probability FLOAT 
+    probability FLOAT,  
     CONSTRAINT fk_scenario_id 
         FOREIGN KEY(scenario_id) 
             REFERENCES scenarios(scenario_id), 
@@ -103,5 +105,5 @@ DB_CREATE_ATOMIC = """CREATE TABLE IF NOT EXISTS stats_atomic (
         FOREIGN KEY(anthill_id) 
             REFERENCES anthills(anthill_id), 
     PRIMARY KEY(scenario_id, anthill_id) 
-)""" 
+);""" 
 
