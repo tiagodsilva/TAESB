@@ -49,13 +49,13 @@ DB_CREATE_FOODS = """CREATE TABLE IF NOT EXISTS foods (
             REFERENCES scenarios(scenario_id) 
 );""" 
 
-# Create tabke for the statistics
-VIEW_CREATE_STATS = """CREATE TABLE IF NOT EXISTS stats (
+# Create table for the statistics
+DB_CREATE_GLOBAL = """CREATE TABLE IF NOT EXISTS stats_global (
     stat_id INT PRIMARY KEY,
-    scenarios INT,
-    anthills INT,
-    ants_searching_food INT,
-    ants INT,
+    n_scenarios INT,
+    n_anthills INT,
+    n_ants_searching_food INT,
+    n_ants INT,
     foods_in_anthills INT,
     foods_in_deposit INT,
     foods_in_transit INT, 
@@ -74,4 +74,34 @@ VIEW_CREATE_STATS = """CREATE TABLE IF NOT EXISTS stats (
         FOREIGN KEY(slw_scenario_id)
             REFERENCES scenarios(scenario_id)
 )"""
+
+# Create table for local statistics 
+DB_CREATE_LOCAL = """CREATE TABLE IF NOT EXITS stats_local ( 
+    scenario_id VARCHAR(256) PRIMARY KEY, 
+    n_anthills INT, 
+    n_ants INT, 
+    n_foods INT, 
+    execution_time INT, 
+    CONSTRAINT fk_scenario_id 
+        FOREIGN KEY(scenario_id) 
+            REFERENCES scenarios(scenario_id) 
+)""" 
+
+# Create table for atomic statistics 
+DB_CREATE_ATOMIC = """CREATE TABLE IF NOT EXISTS stats_atomic ( 
+    scenario_id VARCHAR(256), 
+    anthill_id VARCHAR(256), 
+    n_ants INT, 
+    n_ants_searching_food INT, 
+    foods_deposit INT, 
+    foods_in_transit INT, 
+    probability FLOAT 
+    CONSTRAINT fk_scenario_id 
+        FOREIGN KEY(scenario_id) 
+            REFERENCES scenarios(scenario_id), 
+    CONSTRAINT fk_anthill_id 
+        FOREIGN KEY(anthill_id) 
+            REFERENCES anthills(anthill_id), 
+    PRIMARY KEY(scenario_id, anthill_id) 
+)""" 
 
