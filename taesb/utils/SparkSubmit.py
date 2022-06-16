@@ -438,7 +438,7 @@ ON CONFLICT (scenario_id)
         Compute the quantities for the local, per scenario, data.
         """ 
         # Join the anthills and the scenarios tables
-        join_anthill_scenario = tables[scenarios_tn].join( 
+        joint_anthills = tables[scenarios_tn].join( 
                 tables[anthills_tn], 
                 tables[scenarios_tn].scenario_id == tables[anthills_tn].scenario_id, 
                 "inner" 
@@ -447,9 +447,98 @@ ON CONFLICT (scenario_id)
         # Consolidate the data in a JSON 
         data = dict() 
 
-        # Compute the quatntiy of anthills 
-        data["n_anthills"] = 
-        data["n_anthills"] = a 
+        # Group the tables by scenarios 
+        group_by_scenario = joint_anthills \
+                .groupBy("scenario_id") 
+
+        # Compute the quantity of foods in each anthill, 
+        # which equals the sum 
+        # `food_in_anthills` + `foods_in_transit` + `foods_in_deposit` 
+        
+        # Compute foods in anthills 
+        foods_in_anthills = group_by_scenario \
+                .agg(F.sum("food_storage")) \
+                .alias("foods_in_anthills") 
+
+        # Compute foods in transit 
+        # For this, we should compute the ants in the current scenario 
+        joint_ants = tables[scenarios_tn].join( 
+                tables[ants_tn], 
+                tables[scenarios_tn].scenario_id == tables[ants_tn].scenario_id 
+        ) 
+
+        # Sum the quantity of ants searching food per scenario; this 
+        # equals the quantity of foods in transit 
+        foods_in_transit = joint_ants \
+                .groupBy("scenario_id") \
+                .sum(F.sum("searching_food")) \
+                .alias("foods_in_transit") 
+
+        # Compute the quantity of foods in deposit, 
+        # which is available in the `foods` table 
+        foods_in_deposit = tables[foods_tn] \
+                .groupBy("scenario_id") \
+                .agg(F.sum("current_volume")) \
+                .alias("foods_in_deposit") 
+
+        # Join the tables with the quantities of foods 
+        foods = foods_in_anthills.join( 
+                foods_in_transit, 
+                foods_in_transit.scenario_id == foods_in_anthills.scenario_id, 
+                "inner" 
+        ) 
+
+        foods = foods.join( 
+                foods_in_deposit, 
+                foods_in_deposit.scenario_id == foods.scenario_id, 
+                "inner" 
+        ) 
+        
+        # Check https://stackoverflow.com/questions/44502095/
+        from operator import add 
+        from functools import reduce 
+        foods = foods.withColumn("n_foods", 
+                reduce(add, ["foods_in_anthills", "foods_in_transit", 
+                    "foods_in_deposit"]) 
+        ) 
+        
+        # Compute the quantity of anthills per scenario 
+        anthills = group_by_scenario \
+                .anthill_id \
+                .count() \
+                .alias("n_anthills") 
+
+        # Compute the quantity of ants per scenario 
+        ants = group_by_scenario \
+                .agg(F.sum("total_ants")) \
+                .alias("n_ants") 
+
+        # Join the anthills, ants and foods tables with the scenarios table 
+        scenarios = tables[scenario_tn].join( 
+                foods, 
+                foods.scenario_id == tables[scenario_tn].scenario_id, 
+                "inner" 
+        ) 
+
+        scenarios = scenarios.join( 
+                anthills, 
+                anthills.scenario_id == scenarios.scenario_id, 
+                "inner" 
+        ) 
+
+        scenarios = scenarios.join( 
+                ants, 
+                ants.scenario_id == scenarios.scenario_id, 
+                "inner" 
+        ) 
+
+        data = scenarios \
+                .select(["scenario_id", "n_ants", "n_foods", 
+                    "n_anthills", "execution_time", "active"]) \
+                .asDict() 
+        
+        # Return the aggregated data 
+        return data 
 
     def schedule(self, 
             stamp: str, 
