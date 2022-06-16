@@ -118,18 +118,3 @@ DO
     # Return the query 
     return query 
 
-# Capture data 
-def CAPTURE_DATA(): 
-    """ 
-    Join the tables at the data set and consolidate the data, which could be 
-    used as a RDD with PySpark. 
-    """ 
-    # Identify the ants (in PySpark, queries do not use `;`) 
-    queries = ["SELECT * FROM ants", 
-            "SELECT * FROM anthills", 
-            "SELECT * FROM scenarios", 
-            "SELECT * FROM foods" 
-    ] 
-    # Return the queries 
-    return queries 
-
