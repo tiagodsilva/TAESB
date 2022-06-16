@@ -2,6 +2,7 @@
 Consolidate the DDL queries for the operational database.  
 """ 
 import psycopg2 
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT 
 import sys 
 
 # Drop tables; appropriate for debugging 
@@ -15,10 +16,8 @@ DROP TABLE IF EXISTS stats_atomic CASCADE;"""
 
 # Create the database; workaround to check table's existence 
 DATABASE = "operational_tjg" 
-DB_CREATE = """SELECT 'CREATE DATABASE {db_name}' 
-WHERE NOT EXISTS (
-    SELECT FROM pg_database WHERE datname = '{db_name}'
-);""".format(db_name=DATABASE) 
+DB_CREATE = "CREATE DATABASE {db_name};" \
+        .format(db_name=DATABASE) 
 
 # Create table for the scenarios 
 DB_CREATE_SCENARIOS = """CREATE TABLE IF NOT EXISTS scenarios ( 
@@ -139,17 +138,24 @@ def init_db(
             password=password, 
             database=database,
     ) 
+    
+    db_conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT) 
 
     # Instantiate a cursor 
     cursor = db_conn.cursor() 
     
     # and execute the DDL queries 
     if not drop_tables: 
-        cursor.execute(DB_CREATE) 
+        try: 
+            cursor.execute(DB_CREATE) 
+        except psycopg2.errors.DuplicateDatabase: 
+            print("The database {db_name} already exists!" \
+                    .format(db_name=DATABASE)) 
         cursor.execute(DB_CREATE_SCENARIOS) 
         cursor.execute(DB_CREATE_ANTHILLS) 
         cursor.execute(DB_CREATE_ANTS) 
         cursor.execute(DB_CREATE_FOODS) 
+        cursor.execute(DB_CREATE_GLOBAL) 
         cursor.execute(DB_CREATE_LOCAL) 
         cursor.execute(DB_CREATE_ATOMIC) 
     else: 

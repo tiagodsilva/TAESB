@@ -23,36 +23,34 @@ import json
 # Docs 
 from typing import Dict, Any, List
 
-# Configurations for Spark and Postgres 
-SPARK_CONFIG = "spark_config.json" 
-DB_AUTH = "postgres_auth.json" 
-
 # Start Spark session 
 class ScheduleSpark(object):
     """ 
     Class to schedule Spark jobs. 
     """ 
     
-    def __init__(self, app_name: str,  
-                       database_url: str, 
-                       database_name: str, 
-                       database_auth: Dict[str, str]): 
+    def __init__(self, 
+            app_name: str, 
+            database_name: str, 
+            database_host: str, 
+            database_user: str, 
+            database_pwd: str): 
         """ 
         Constructor method for ScheduleSpark. 
         """ 
         # Instantiate attributes
         self.app_name = app_name 
-        self.database_url = database_url 
         self.database_name = database_name 
-        self.database_auth = database_auth 
-
+        self.database_host = database_host 
+        self.database_user = database_user 
+        self.database_pwd = database_pwd 
         # and start a Spark session 
         self.spark_session = SparkSession \
                 .builder \
                 .config("spark.jars", SPARK_JARS) \
                 .config("spark.master", SPARK_MASTER) \
                 .config("spark.ui.enabled", SPARK_UI_ENABLED) \
-                .config("spark.driver.host", POSTGRESQL_HOST) \
+                .config("spark.driver.host", SPARK_DRIVER_HOST) \
                 .getOrCreate() 
 
         # Iniitialize the data base 
@@ -64,10 +62,10 @@ class ScheduleSpark(object):
         """ 
         # Initialize the access to the data base 
         self.db_conn = psycopg2.connect( 
-                host=POSTGRESQL_HOST, 
+                host=self.database_host, 
                 database=self.database_name, 
-                user=self.database_auth["user"], 
-                password=self.database_auth["password"] 
+                user=self.database_user, 
+                password=self.database_pwd 
         ) 
 
     def execute_query(self, query: str): 
@@ -85,10 +83,14 @@ class ScheduleSpark(object):
         """ 
         dataframe = self.spark_session.read \
                 .format("jdbc") \
-                .option("url", self.database_url) \
+                .option("url", "{driver}://{host}/{database}".format( 
+                    driver="jdbc:postgresql", 
+                    host=self.database_host, 
+                    database=self.database_name) 
+                ) \
                 .option("dbtable", tablename) \
-                .option("user", self.database_auth["user"]) \
-                .option("password", self.database_auth["password"]) \
+                .option("user", self.database_user) \
+                .option("password", self.database_pwd) \
                 .option("driver", "org.postgresql.Driver") \
                 .load() 
 
@@ -684,21 +686,12 @@ ON CONFLICT (scenario_id)
        
 if __name__ == "__main__": 
     # Capture Spark's configurations 
-   
-    # And the database authentication tab 
-    with open(DB_AUTH, "r") as stream: 
-        database_auth = json.load(stream) 
-
-    database_name = "postgres" 
-    database_url = "jdbc:postgresql://localhost:5432/{database}" \
-            .format(database=database_name) 
-        
     # Instantiate a session for Spark 
     spark = ScheduleSpark("taesb", 
-            database_url, 
-            database_name, 
-            database_auth 
-    ) 
+            database_name=POSTGRESQL_DATABASE, 
+            database_host=POSTGRESQL_HOST, 
+            database_user=POSTGRESQL_USER, 
+            database_pwd=POSTGRESQL_PASSWORD) 
     
     spark.schedule(stamp=5) 
    

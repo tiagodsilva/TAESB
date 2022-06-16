@@ -4,6 +4,7 @@ Consolidate Spark configurations.
 SPARK_JARS = "postgresql-42.3.6.jar" 
 SPARK_MASTER = "local[8]" 
 SPARK_UI_ENABLED = "false" 
+SPARK_DRIVER_HOST = "localhost"
 POSTGRESQL_HOST = "database-postgres-tjg.cvb1csfwepbn.us-east-1.rds.amazonaws.com" 
 POSTGRESQL_USER = "postgres" 
 POSTGRESQL_PASSWORD = "passwordpassword"
