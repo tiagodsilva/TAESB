@@ -13,14 +13,6 @@ import pyspark.sql.functions as F
 
 # Database 
 import psycopg2 
-from .operational_db import DB_CREATE_SCENARIOS, \
-        DB_CREATE_ANTHILLS, \
-        DB_CREATE_ANTS, \
-        DB_CREATE_FOODS, \
-        DB_CREATE_GLOBAL, \
-        DB_CREATE_LOCAL, \
-        DB_CREATE_ATOMIC, \
-        DROP_TABLES 
 
 from .dml import INSERT_ANTS, \
         INSERT_ANTHILLS, \
@@ -87,46 +79,16 @@ def update_foods(global_map: Dict):
     query = INSERT_FOODS(global_map["foods"], global_map["scenario_id"]) 
     app.execute_query(query) 
 
-#@app.task() 
-#def current_foods(global_map: Dict): 
-#    """
-#    Compute the quantity of foods in each anthill. 
-#    """ 
-#    # Identify the anthills 
-#    anthills = [anthill for anthill in global_map["anthills"]] 
-#    # and the foods 
-#    foods = [(anthill["name"], anthill["food_storage"]) for anthill in anthills] 
-#    
-#    # Return the quantity of foods in each anthill 
-#    return foods 
-#
 @worker_process_init.connect 
 def init_worker(**kwargs): 
     """ 
     Instantiate a connection to the data base. 
     """ 
     print("Initializing connection to the database") 
-    queries = list() 
-    
-    # If in debugging mode, drop tables 
-    if DEBUG: 
-        queries += [DROP_TABLES] 
-
-    queries += [ 
-            DB_CREATE_SCENARIOS, 
-            DB_CREATE_ANTHILLS, 
-            DB_CREATE_ANTS, 
-            DB_CREATE_FOODS, 
-            DB_CREATE_GLOBAL, 
-            DB_CREATE_LOCAL, 
-            DB_CREATE_ATOMIC 
-    ] 
-    
     app._init_database( 
             database="postgres", 
             user="tiago", 
             password="password", 
-            queries=queries 
     ) 
 
 @worker_process_shutdown.connect 
