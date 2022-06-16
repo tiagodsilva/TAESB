@@ -12,6 +12,10 @@ from pyspark.sql import SparkSession
 import pyspark.sql.functions as F 
 from pyspark.conf import SparkConf 
 
+# Import SPARK_* variables 
+sys.path.append("..") 
+from SparkConf import *
+
 import psycopg2 
 import time 
 import json 
@@ -29,8 +33,7 @@ class ScheduleSpark(object):
     Class to schedule Spark jobs. 
     """ 
     
-    def __init__(self, app_name: str, 
-                       spark_config: Dict[str, str], 
+    def __init__(self, app_name: str,  
                        database_url: str, 
                        database_name: str, 
                        database_auth: Dict[str, str]): 
@@ -39,24 +42,19 @@ class ScheduleSpark(object):
         """ 
         # Instantiate attributes
         self.app_name = app_name 
-        self.spark_config = spark_config 
         self.database_url = database_url 
         self.database_name = database_name 
         self.database_auth = database_auth 
 
         # and start a Spark session 
         self.spark_session = SparkSession \
-                .builder 
-
-        for config in spark_config: 
-            # Update session's configuration 
-            self.spark_session = self.spark_session \
-                .config(config, spark_config[config]) 
-        
-        # Check if there is already a session 
-        self.spark_session = self.spark_session \
+                .builder \
+                .config("spark.jars", SPARK_JARS) \
+                .config("spark.master", SPARK_MASTER) \
+                .config("spark.ui.enabled", SPARK_UI_ENABLED) \
+                .config("spark.driver.host", POSTGRESQL_HOST) \
                 .getOrCreate() 
-        
+
         # Iniitialize the data base 
         self.init_db() 
 
@@ -66,6 +64,7 @@ class ScheduleSpark(object):
         """ 
         # Initialize the access to the data base 
         self.db_conn = psycopg2.connect( 
+                host=POSTGRESQL_HOST, 
                 database=self.database_name, 
                 user=self.database_auth["user"], 
                 password=self.database_auth["password"] 
@@ -685,9 +684,7 @@ ON CONFLICT (scenario_id)
        
 if __name__ == "__main__": 
     # Capture Spark's configurations 
-    with open(SPARK_CONFIG, "r") as stream: 
-        spark_config = json.load(stream) 
-    
+   
     # And the database authentication tab 
     with open(DB_AUTH, "r") as stream: 
         database_auth = json.load(stream) 
@@ -698,7 +695,6 @@ if __name__ == "__main__":
         
     # Instantiate a session for Spark 
     spark = ScheduleSpark("taesb", 
-            spark_config, 
             database_url, 
             database_name, 
             database_auth 

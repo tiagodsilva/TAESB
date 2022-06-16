@@ -6,6 +6,8 @@ from celery.signals import worker_process_init, worker_process_shutdown
 from celery.schedules import crontab 
 
 from ..utils import CallbacksList 
+# SPARK_* files 
+from ..SparkConf import * 
 
 import pyspark 
 from pyspark.sql import SparkSession 
@@ -86,9 +88,10 @@ def init_worker(**kwargs):
     """ 
     print("Initializing connection to the database") 
     app._init_database( 
-            database="postgres", 
-            user="tiago", 
-            password="password", 
+            host=POSTGRESQL_HOST, 
+            database=POSTGRESQL_DATABASE, 
+            user=POSTGRESQL_USER, 
+            password=POSTGRESQL_PASSWORD, 
     ) 
 
 @worker_process_shutdown.connect 
