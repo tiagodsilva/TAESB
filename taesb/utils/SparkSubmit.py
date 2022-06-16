@@ -693,5 +693,5 @@ if __name__ == "__main__":
             database_user=POSTGRESQL_USER, 
             database_pwd=POSTGRESQL_PASSWORD) 
     
-    spark.schedule(stamp=5) 
+    spark.schedule(stamp=2)
    

@@ -8,6 +8,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F 
 import os 
 
+from taesb.SparkConf import * 
+
 # Benchmarks 
 import time 
 
@@ -24,17 +26,18 @@ spark = SparkSession \
         .config("spark.driver.host", "localhost") \
         .getOrCreate() 
 
-def read_table(tablename: str, database: str = "postgres"): 
+def read_table(tablename: str): 
     """ 
     Read a table from the database `adatabase`. 
     """ 
     rdd = spark.read \
             .format("jdbc") \
-            .option("url", "jdbc:postgresql://localhost:5432/{database}".format( 
-                database=database)) \
+            .option("url", "jdbc:postgresql://{HOST}/{database}".format( 
+                HOST=POSTGRESQL_HOST, 
+                database=POSTGRESQL_DATABASE)) \
             .option("dbtable", "{tablename}".format(tablename=tablename)) \
-            .option("user", "tiago") \
-            .option("password", "password") \
+            .option("user", POSTGRESQL_USER) \
+            .option("password", POSTGRESQL_PASSWORD) \
             .option("driver", "org.postgresql.Driver") \
             .load() 
 
@@ -79,27 +82,28 @@ if __name__ == "__main__":
     write_csvs(["anthills", "ants", "scenarios", 
         "foods"]) 
     
-    anthills = read_table("anthills") 
-    ants = read_table("ants") 
-    scenarios = read_table("scenarios") 
-    stats = read_table("stats_atomic") 
+    # anthills = read_table("anthills") 
+    # ants = read_table("ants") 
+    # scenarios = read_table("scenarios") 
 
-    # Ants in active anthills 
-    active_ants = ants.join( 
-            anthills, 
-            anthills.anthill_id == ants.anthill_id, 
-            "inner" 
-    ) 
-    active_ants = active_ants.join( 
-            scenarios, 
-            scenarios.scenario_id == active_ants.scenario_id,
-            "inner" 
-    ) 
-    active_ants = active_ants.filter( 
-            active_ants.active == 1 
-    ) 
+    stats = read_table("stats_local") 
 
-    active_ants.show() 
-
-    scenarios.show() 
+#    # Ants in active anthills 
+#    active_ants = ants.join( 
+#            anthills, 
+#            anthills.anthill_id == ants.anthill_id, 
+#            "inner" 
+#    ) 
+#    active_ants = active_ants.join( 
+#            scenarios, 
+#            scenarios.scenario_id == active_ants.scenario_id,
+#            "inner" 
+#    ) 
+#    active_ants = active_ants.filter( 
+#            active_ants.active == 1 
+#    ) 
+#
+#    active_ants.show() 
+#
+    # scenarios.show() 
     stats.show() 
