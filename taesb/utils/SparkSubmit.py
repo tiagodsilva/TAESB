@@ -192,7 +192,8 @@ ON CONFLICT (stat_id)
             scenario_id_l: List[str], 
             n_anthills_l: List[int], 
             n_foods_l: List[int], 
-            excecution_time_l: List[int] 
+            excecution_time_l: List[int], 
+            active_l: List[int], 
         ): 
         """ 
         Update the table that displays local statistics. 
@@ -202,13 +203,14 @@ ON CONFLICT (stat_id)
         n_anthills, 
         n_ants, 
         n_foods, 
-        execution_time
+        execution_time, 
+        active 
 )""" 
         
         # Consolidate the queries in a list 
         queries = list() 
-        for (scenario_id, n_anthills, n_foods, execution_time) in \
-                zip(scenario_id_l, n_anthills_l, n_foods_l, execution_time_l): 
+        for (scenario_id, n_anthills, n_foods, execution_time, active) in \
+                zip(scenario_id_l, n_anthills_l, n_foods_l, execution_time_l, active_l): 
             # Insert the instance in the data base; if the scenario already 
             # exists, update it 
             scenario_query = query + """
@@ -217,17 +219,20 @@ VALUES
             {n_anthills}, 
             {n_ants}, 
             {n_foods}, 
-            {execution_time}) 
+            {execution_time}, 
+            {active}) 
 ON CONFLICT (scenario_id) 
     DO 
         UPDATE SET n_anthills = {n_anthills}, 
                    n_ants = {n_ants}, 
                    n_foods = {n_foods}, 
-                   execution_time = {execution_time};""".format( 
+                   execution_time = {execution_time}, 
+                   active = {active};""".format( 
                            n_anthills=n_anthills, 
                            n_ants=n_ants,
                            n_foods=n_foods, 
-                           execution_time=execution_time 
+                           execution_time=execution_time, 
+                           active=active
                     ) 
         
             # Append the current query to the list of queries 
@@ -243,7 +248,8 @@ ON CONFLICT (scenario_id)
             n_ants_searching_food_l: List[int], 
             foods_in_deposit_l: List[int], 
             foods_in_transit_l: List[int], 
-            probability_l: List[float]): 
+            probability_l: List[float], 
+            active_l: List[int]): 
         """ 
         Update the data with atomic values, for each anthill. 
         """ 
@@ -254,7 +260,8 @@ ON CONFLICT (scenario_id)
         n_ants_searching_food, 
         foods_in_deposit, 
         foods_in_transit, 
-        probability 
+        probability, 
+        active
 )""" 
     
         # Consolidate the queries in a list 
@@ -262,9 +269,9 @@ ON CONFLICT (scenario_id)
         
         # Insert a query for each instance 
         for scenario_id, anthill_id, n_ants, n_ants_searching_food, \
-                foods_in_deposit, foods_in_transit, probability in \
+                foods_in_deposit, foods_in_transit, probability, active in \
                 zip(scenario_id_l, anthill_id_l, n_ants_l, n_ants_searching_food_l, 
-                    foods_in_deposit_l, foods_in_transit_l, probability_l): 
+                    foods_in_deposit_l, foods_in_transit_l, probability_l, active_l): 
 
             # Write the query
             anthill_query = query + """
@@ -275,7 +282,8 @@ ON CONFLICT (scenario_id)
             {n_ants_searching_food}, 
             {foods_in_deposit}, 
             {foods_in_transit}, 
-            {probability} 
+            {probability}, 
+            {active} 
     ) 
     ON CONFLICT (scenario_id, anthill_id) 
         DO
@@ -283,14 +291,16 @@ ON CONFLICT (scenario_id)
                        n_ants_searching_food = {n_ants_searching_food}, 
                        foods_in_deposit = {foods_in_deposit}, 
                        foods_in_transit = {foods_in_transit}, 
-                       probability = {probability}""".format( 
+                       probability = {probability}, 
+                       active = {active};""".format( 
                                scenario_id=scenario_id,
                                anthill_id=anthill_id, 
                                n_ants=n_ants,
                                n_ants_searching_food=n_ants_searching_food,
                                foods_in_deposit=foods_in_deposit,
                                foods_in_transit=foods_in_transit,
-                               probability=probability
+                               probability=probability, 
+                               active=active 
                         ) 
             
             # Append the query to the list 
@@ -418,6 +428,29 @@ ON CONFLICT (scenario_id)
         # Return the data 
         return data 
     
+    def compute_local_stats(self, 
+            tables: pyspark.sql.DataFrame, 
+            scenarios_tn: str, 
+            ants_tn: str, 
+            anthills_tn: str, 
+            foods_tn: str): 
+        """ 
+        Compute the quantities for the local, per scenario, data.
+        """ 
+        # Join the anthills and the scenarios tables
+        join_anthill_scenario = tables[scenarios_tn].join( 
+                tables[anthills_tn], 
+                tables[scenarios_tn].scenario_id == tables[anthills_tn].scenario_id, 
+                "inner" 
+        ) 
+
+        # Consolidate the data in a JSON 
+        data = dict() 
+
+        # Compute the quatntiy of anthills 
+        data["n_anthills"] = 
+        data["n_anthills"] = a 
+
     def schedule(self, 
             stamp: str, 
             timeout: int=None): 
