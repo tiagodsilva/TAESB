@@ -247,10 +247,9 @@ ON CONFLICT (scenario_id)
             anthill_id_l: List[str], 
             n_ants_l: List[int], 
             n_ants_searching_food_l: List[int], 
-            foods_in_deposit_l: List[int], 
+            foods_in_anthills_l: List[int], 
             foods_in_transit_l: List[int], 
-            probability_l: List[float], 
-            active_l: List[int]): 
+            probability_l: List[float]): 
         """ 
         Update the data with atomic values, for each anthill. 
         """ 
@@ -259,49 +258,44 @@ ON CONFLICT (scenario_id)
         anthill_id, 
         n_ants, 
         n_ants_searching_food, 
-        foods_in_deposit, 
+        foods_in_anthills, 
         foods_in_transit, 
-        probability, 
-        active
-)""" 
+        probability)""" 
     
         # Consolidate the queries in a list 
         queries = list() 
         
         # Insert a query for each instance 
         for scenario_id, anthill_id, n_ants, n_ants_searching_food, \
-                foods_in_deposit, foods_in_transit, probability, active in \
+                foods_in_anthills, foods_in_transit, probability in \
                 zip(scenario_id_l, anthill_id_l, n_ants_l, n_ants_searching_food_l, 
-                    foods_in_deposit_l, foods_in_transit_l, probability_l, active_l): 
+                    foods_in_anthills_l, foods_in_transit_l, probability_l): 
 
             # Write the query
             anthill_query = query + """
     VALUES 
-            ({scenario_id}, 
-            {anthill_id}, 
+            ('{scenario_id}', 
+            '{anthill_id}', 
             {n_ants}, 
             {n_ants_searching_food}, 
-            {foods_in_deposit}, 
+            {foods_in_anthills}, 
             {foods_in_transit}, 
-            {probability}, 
-            {active} 
+            {probability}  
     ) 
     ON CONFLICT (scenario_id, anthill_id) 
         DO
             UPDATE SET n_ants = {n_ants}, 
                        n_ants_searching_food = {n_ants_searching_food}, 
-                       foods_in_deposit = {foods_in_deposit}, 
+                       foods_in_anthills = {foods_in_anthills}, 
                        foods_in_transit = {foods_in_transit}, 
-                       probability = {probability}, 
-                       active = {active};""".format( 
+                       probability = {probability};""".format( 
                                scenario_id=scenario_id,
                                anthill_id=anthill_id, 
                                n_ants=n_ants,
                                n_ants_searching_food=n_ants_searching_food,
-                               foods_in_deposit=foods_in_deposit,
+                               foods_in_anthills=foods_in_anthills,
                                foods_in_transit=foods_in_transit,
-                               probability=probability, 
-                               active=active 
+                               probability=probability
                         ) 
             
             # Append the query to the list 
@@ -354,7 +348,11 @@ ON CONFLICT (scenario_id)
                     anthills_tn=anthills_tn, 
                     foods_tn=foods_tn, 
                     scenarios_tn=scenarios_tn) 
-
+            atomic_stats = self.compute_atomic_stats(tables, 
+                    ants_tn=ants_tn, 
+                    anthills_tn=anthills_tn, 
+                    foods_tn=foods_tn, 
+                    scenarios_tn=scenarios_tn) 
         except IndexError as err: 
             print("[ERROR]: {err}".format(err=err))
             # There are no instances in the table 
@@ -366,6 +364,7 @@ ON CONFLICT (scenario_id)
 
         self._update_global(**global_stats) 
         self._update_local(**local_stats) 
+        self._update_atomic(**atomic_stats) 
 
     def compute_global_stats(self, 
             tables: Dict[str, pyspark.sql.DataFrame], 
@@ -559,7 +558,112 @@ ON CONFLICT (scenario_id)
 
         # Return the aggregated data 
         return data 
+    
+    def compute_atomic_stats(self, 
+            tables: Dict[str, pyspark.sql.DataFrame], 
+            ants_tn: str,
+            anthills_tn: str, 
+            foods_tn: str, 
+            scenarios_tn: str): 
+        """ 
+        Compute the atomic quantities (per anthill, per scenario). 
+        """ 
+        # We should identify, for each anthill in each scenario, 
+        #   + the quantity of ants, and the percentual of those searching food, 
+        #   + the quantity of food stored, and the percentual in transit, and 
+        #   + the probability of winning the game, which is proportional 
+        #       to the quantity of food stored 
+        
+        # Instantiate a object to write the data 
+        data = dict() 
+        
+        # Write aimed fields 
+        n_ants = "n_ants" 
+        n_ants_searching_food = "n_ants_searching_food" 
+        foods_in_anthills = "foods_in_anthills" 
+        foods_in_transit = "foods_in_transit" 
+        probability = "probability" 
 
+        # Join the ants table and the anthills table; group by anthill_id 
+        joint_ants = tables[ants_tn].join( 
+                tables[anthills_tn], 
+                on="anthill_id", 
+                how="inner" 
+        ).groupBy("anthill_id") 
+
+        # Compute the quantity of ants 
+        data[n_ants] = joint_ants \
+                .agg(F.count("ant_id").alias(n_ants))  
+
+        # and the quantity of ants searching food 
+        data[n_ants_searching_food] = joint_ants \
+                .agg(F.sum("searching_food").alias(n_ants_searching_food))  
+
+        # Compute the quantity of foods in the deposit 
+        data[foods_in_anthills] = tables[anthills_tn] \
+                .selectExpr("anthill_id", "food_storage AS {foods_in_anthills}".format( 
+                    foods_in_anthills=foods_in_anthills))  
+
+        # Compute the quantity of foods in transit 
+        data[foods_in_transit] = tables[ants_tn] \
+                .groupBy("anthill_id") \
+                .agg(F.sum("searching_food").alias(foods_in_transit)) 
+
+        # Compute the probability of winning, which is proportional to 
+        # `foods_in_deposit` 
+        total_foods_in_deposit = tables[anthills_tn] \
+                .groupBy("scenario_id") \
+                .agg(F.sum("food_storage").alias("total_foods")) 
+
+        data[probability] = tables[anthills_tn].join( 
+                total_foods_in_deposit, 
+                on="scenario_id", 
+                how="inner"
+        ).select(["scenario_id", "anthill_id", "food_storage", "total_foods"]) \
+                .withColumn(probability, F.col("food_storage")/F.col("total_foods")) 
+
+        # Join the tables 
+        datatb = data[n_ants] 
+        # Release object 
+        del data[n_ants] 
+        for field in [n_ants_searching_food, foods_in_anthills, \
+                foods_in_transit, probability]: 
+            # Join the tables 
+            datatb = datatb.join( 
+                    data[field], 
+                    on="anthill_id",
+                    how="inner" 
+            ) 
+            # Release object 
+            del data[field] 
+         
+        # Release object 
+        del data 
+
+        # Convert the data to a JSON 
+        datatb = datatb \
+                .select([
+                    "anthill_id", 
+                    "scenario_id", 
+                    foods_in_anthills, 
+                    foods_in_transit, 
+                    probability, 
+                    n_ants, 
+                    n_ants_searching_food]) \
+                .toPandas().to_dict("list") 
+        
+        # Update suffxes (for consistency with subsequent procedures) 
+        data = dict() 
+        for key in datatb: 
+            # Update column's name 
+            data[key + "_l"] = datatb[key] 
+        
+        # Release object 
+        del datatb  
+
+        # Return the current data 
+        return data 
+    
     def schedule(self, 
             stamp: str, 
             timeout: int=None): 

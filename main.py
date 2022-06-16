@@ -89,7 +89,7 @@ def main(args):
     """ 
     callbacks = taesb.CallbacksList( 
           initialize = tasks.initialize_database,      
-          callbacks = [tasks.current_foods, 
+          callbacks = [# tasks.current_foods, 
             tasks.update_scenarios, 
             tasks.update_anthills, 
             tasks.update_foods, 

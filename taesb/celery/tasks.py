@@ -87,19 +87,19 @@ def update_foods(global_map: Dict):
     query = INSERT_FOODS(global_map["foods"], global_map["scenario_id"]) 
     app.execute_query(query) 
 
-@app.task() 
-def current_foods(global_map: Dict): 
-    """
-    Compute the quantity of foods in each anthill. 
-    """ 
-    # Identify the anthills 
-    anthills = [anthill for anthill in global_map["anthills"]] 
-    # and the foods 
-    foods = [(anthill["name"], anthill["food_storage"]) for anthill in anthills] 
-    
-    # Return the quantity of foods in each anthill 
-    return foods 
-
+#@app.task() 
+#def current_foods(global_map: Dict): 
+#    """
+#    Compute the quantity of foods in each anthill. 
+#    """ 
+#    # Identify the anthills 
+#    anthills = [anthill for anthill in global_map["anthills"]] 
+#    # and the foods 
+#    foods = [(anthill["name"], anthill["food_storage"]) for anthill in anthills] 
+#    
+#    # Return the quantity of foods in each anthill 
+#    return foods 
+#
 @worker_process_init.connect 
 def init_worker(**kwargs): 
     """ 

@@ -82,7 +82,7 @@ if __name__ == "__main__":
     anthills = read_table("anthills") 
     ants = read_table("ants") 
     scenarios = read_table("scenarios") 
-    stats = read_table("stats_local") 
+    stats = read_table("stats_atomic") 
 
     # Ants in active anthills 
     active_ants = ants.join( 

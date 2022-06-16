@@ -96,10 +96,9 @@ DB_CREATE_ATOMIC = """CREATE TABLE IF NOT EXISTS stats_atomic (
     anthill_id VARCHAR(256), 
     n_ants INT, 
     n_ants_searching_food INT, 
-    foods_in_deposit INT, 
+    foods_in_anthills INT, 
     foods_in_transit INT, 
     probability FLOAT,  
-    active INT, 
     CONSTRAINT fk_scenario_id 
         FOREIGN KEY(scenario_id) 
             REFERENCES scenarios(scenario_id), 
