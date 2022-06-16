@@ -211,7 +211,8 @@ ON CONFLICT (stat_id)
                 zip(scenario_id_l, n_anthills_l, n_foods_l, execution_time_l): 
             # Insert the instance in the data base; if the scenario already 
             # exists, update it 
-            scenario_query = query + """VALUES 
+            scenario_query = query + """
+VALUES 
             ({scenario_id}, 
             {n_anthills}, 
             {n_ants}, 
@@ -234,7 +235,70 @@ ON CONFLICT (scenario_id)
 
         # Execute the queries jointly 
         self.execute_query("\n".join(queries)) 
+    
+    def _update_atomic(self, 
+            scenario_id_l: List[str], 
+            anthill_id_l: List[str], 
+            n_ants_l: List[int], 
+            n_ants_searching_food_l: List[int], 
+            foods_in_deposit_l: List[int], 
+            foods_in_transit_l: List[int], 
+            probability_l: List[float]): 
+        """ 
+        Update the data with atomic values, for each anthill. 
+        """ 
+        query = """INSERT INTO stats_atomic 
+        (scenario_id, 
+        anthill_id, 
+        n_ants, 
+        n_ants_searching_food, 
+        foods_in_deposit, 
+        foods_in_transit, 
+        probability 
+)""" 
+    
+        # Consolidate the queries in a list 
+        queries = list() 
         
+        # Insert a query for each instance 
+        for scenario_id, anthill_id, n_ants, n_ants_searching_food, \
+                foods_in_deposit, foods_in_transit, probability in \
+                zip(scenario_id_l, anthill_id_l, n_ants_l, n_ants_searching_food_l, 
+                    foods_in_deposit_l, foods_in_transit_l, probability_l): 
+
+            # Write the query
+            anthill_query = query + """
+    VALUES 
+            ({scenario_id}, 
+            {anthill_id}, 
+            {n_ants}, 
+            {n_ants_searching_food}, 
+            {foods_in_deposit}, 
+            {foods_in_transit}, 
+            {probability} 
+    ) 
+    ON CONFLICT (scenario_id, anthill_id) 
+        DO
+            UPDATE SET n_ants = {n_ants}, 
+                       n_ants_searching_food = {n_ants_searching_food}, 
+                       foods_in_deposit = {foods_in_deposit}, 
+                       foods_in_transit = {foods_in_transit}, 
+                       probability = {probability}""".format( 
+                               scenario_id=scenario_id,
+                               anthill_id=anthill_id, 
+                               n_ants=n_ants,
+                               n_ants_searching_food=n_ants_searching_food,
+                               foods_in_deposit=foods_in_deposit,
+                               foods_in_transit=foods_in_transit,
+                               probability=probability
+                        ) 
+            
+            # Append the query to the list 
+            queries.append(anthill_query) 
+
+        # Execute the DML queries 
+        self.execute_query("\n".join(queries)) 
+
     def update_stats(self):
         """
         Update the appropriate data in the analytical database.
