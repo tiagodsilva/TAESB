@@ -17,7 +17,7 @@ import time
 import json 
 
 # Docs 
-from typing import Dict, Any 
+from typing import Dict, Any, List
 
 # Configurations for Spark and Postgres 
 SPARK_CONFIG = "spark_config.json" 
@@ -96,11 +96,11 @@ class ScheduleSpark(object):
         # Return the data frame 
         return dataframe 
 
-    def _update_query(self, 
-            scenarios: int, 
-            anthills: int, 
-            ants_searching_food: int, 
-            ants: int, 
+    def _update_global(self, 
+            n_scenarios: int, 
+            n_anthills: int, 
+            n_ants_searching_food: int, 
+            n_ants: int, 
             foods_in_anthills: int, 
             foods_in_deposit: int, 
             foods_in_transit: int, 
@@ -118,12 +118,12 @@ class ScheduleSpark(object):
         this is done periodically. 
         """ 
         # Write the query 
-        query = """INSERT INTO stats 
+        query = """INSERT INTO stats_global
         (stat_id, 
-        scenarios, 
-        anthills, 
-        ants_searching_food, 
-        ants, 
+        n_scenarios, 
+        n_anthills, 
+        n_ants_searching_food, 
+        n_ants, 
         foods_in_anthills, 
         foods_in_deposit, 
         foods_in_transit, 
@@ -137,10 +137,10 @@ class ScheduleSpark(object):
         max_ant_food) 
 VALUES 
         (1, 
-        {scenarios}, 
-        {anthills}, 
-        {ants_searching_food}, 
-        {ants}, 
+        {n_scenarios}, 
+        {n_anthills}, 
+        {n_ants_searching_food}, 
+        {n_ants}, 
         {foods_in_anthills}, 
         {foods_in_deposit}, 
         {foods_in_transit}, 
@@ -154,10 +154,10 @@ VALUES
         {max_ant_food}) 
 ON CONFLICT (stat_id) 
     DO 
-        UPDATE SET scenarios = {scenarios}, 
-                   anthills = {anthills}, 
-                   ants_searching_food = {ants_searching_food}, 
-                   ants = {ants}, 
+        UPDATE SET n_scenarios = {n_scenarios}, 
+                   n_anthills = {n_anthills}, 
+                   n_ants_searching_food = {n_ants_searching_food}, 
+                   n_ants = {n_ants}, 
                    foods_in_anthills = {foods_in_anthills}, 
                    foods_in_deposit = {foods_in_deposit}, 
                    foods_in_transit = {foods_in_transit}, 
@@ -169,10 +169,10 @@ ON CONFLICT (stat_id)
                    slw_scenario_time = {slw_scenario_time}, 
                    avg_ant_food = {avg_ant_food}, 
                    max_ant_food = {max_ant_food};""".format( 
-                           scenarios=scenarios,
-                           anthills=anthills,
-                           ants_searching_food=ants_searching_food,
-                           ants=ants,
+                           n_scenarios=n_scenarios,
+                           n_anthills=n_anthills,
+                           n_ants_searching_food=n_ants_searching_food,
+                           n_ants=n_ants,
                            foods_in_anthills=foods_in_anthills,
                            foods_in_deposit=foods_in_deposit, 
                            foods_in_transit=foods_in_transit, 
@@ -188,7 +188,53 @@ ON CONFLICT (stat_id)
 
         self.execute_query(query) 
     
+    def _update_local(self, 
+            scenario_id_l: List[str], 
+            n_anthills_l: List[int], 
+            n_foods_l: List[int], 
+            excecution_time_l: List[int] 
+        ): 
+        """ 
+        Update the table that displays local statistics. 
+        """ 
+        query = """INSERT INTO stats_local
+        (scenario_id, 
+        n_anthills, 
+        n_ants, 
+        n_foods, 
+        execution_time
+)""" 
+        
+        # Consolidate the queries in a list 
+        queries = list() 
+        for (scenario_id, n_anthills, n_foods, execution_time) in \
+                zip(scenario_id_l, n_anthills_l, n_foods_l, execution_time_l): 
+            # Insert the instance in the data base; if the scenario already 
+            # exists, update it 
+            scenario_query = query + """VALUES 
+            ({scenario_id}, 
+            {n_anthills}, 
+            {n_ants}, 
+            {n_foods}, 
+            {execution_time}) 
+ON CONFLICT (scenario_id) 
+    DO 
+        UPDATE SET n_anthills = {n_anthills}, 
+                   n_ants = {n_ants}, 
+                   n_foods = {n_foods}, 
+                   execution_time = {execution_time};""".format( 
+                           n_anthills=n_anthills, 
+                           n_ants=n_ants,
+                           n_foods=n_foods, 
+                           execution_time=execution_time 
+                    ) 
+        
+            # Append the current query to the list of queries 
+            queries.append(scenario_query) 
 
+        # Execute the queries jointly 
+        self.execute_query("\n".join(queries)) 
+        
     def update_stats(self):
         """
         Update the appropriate data in the analytical database.
@@ -216,7 +262,7 @@ ON CONFLICT (stat_id)
         # We send the name of the tables to guarantee 
         # that these quantities are not reassigned everywhere 
         try: 
-            curr_stats = self.compute_stats(tables,
+            curr_stats = self.compute_global_stats(tables,
                     ants_tn=ants_tn,
                     anthills_tn=anthills_tn, 
                     foods_tn=foods_tn, 
@@ -230,9 +276,9 @@ ON CONFLICT (stat_id)
             # sum `NoneType` with an integer 
             return 
 
-        self._update_query(**curr_stats) 
+        self._update_global(**curr_stats) 
 
-    def compute_stats(self, 
+    def compute_global_stats(self, 
             tables: Dict[str, pyspark.sql.DataFrame], 
             ants_tn: str, 
             anthills_tn: str, 
@@ -245,9 +291,9 @@ ON CONFLICT (stat_id)
         data = dict() 
 
         # Compute the quantity of scenarios 
-        data["scenarios"] = tables[scenarios_tn].count() 
+        data["n_scenarios"] = tables[scenarios_tn].count() 
         # and the quantity of anthills 
-        data["anthills"] = tables[anthills_tn].count() 
+        data["n_anthills"] = tables[anthills_tn].count() 
         
         # and the quantity of foods in deposit 
         data["foods_in_deposit"] = tables[foods_tn] \
@@ -255,14 +301,14 @@ ON CONFLICT (stat_id)
                 .collect()[0][0] 
 
         # Quantity of ants alive 
-        data["ants"] = tables[ants_tn].count() 
+        data["n_ants"] = tables[ants_tn].count() 
         # and quantity searching food 
-        data["ants_searching_food"] = tables[ants_tn] \
+        data["n_ants_searching_food"] = tables[ants_tn] \
                 .agg(F.sum("searching_food")) \
                 .collect()[0][0] 
 
         # Quantity of foods in transit 
-        data["foods_in_transit"] = data["ants"] - data["ants_searching_food"] 
+        data["foods_in_transit"] = data["n_ants"] - data["n_ants_searching_food"] 
 
         # Quantity of foods in the anthills 
         data["foods_in_anthills"] = tables[anthills_tn] \
