@@ -203,11 +203,14 @@ class Map(object):
             if self.verbose: 
                 self.print() 
                 time.sleep(1)  
+
+
         # Compute the execution time 
         self.execution_time = self.iteration 
 
         # Update the database with the current data 
-        callbacks.stage_update(self)  
+        if callbacks: 
+            callbacks.stage_update(self)  
 
     def check_winners(self, max_foods: int): 
         """ 
@@ -315,7 +318,7 @@ class Map(object):
         # Serialize the foods 
         self.json["scenario_id"] = self.identifier 
         self.json["execution_time"] = self.iteration 
-        self.json["active"] = int(self.execution_time is None) 
+        self.json["active"] = int(self.execution_time == "NULL") 
     
         self.json["foods"] = [{ 
             "loc": (x, y), 
