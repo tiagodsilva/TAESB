@@ -382,7 +382,15 @@ ON CONFLICT (scenario_id)
         """ 
         # Generate a table to gather the results 
         data = dict() 
+        
+        data["n_scenarios"] = tables[scenarios_tn].count() 
+    
+        # Join the anthills and ants tables 
+        joint_ants = tables[ants_tn].join( 
+                tables[anthills_tn]  
+        ) 
 
+        ############################################### 
         # Compute the quantity of scenarios 
         data["n_scenarios"] = tables[scenarios_tn].count() 
         # and the quantity of anthills 
@@ -612,7 +620,7 @@ ON CONFLICT (scenario_id)
         # Compute the quantity of foods in transit 
         data[foods_in_transit] = tables[ants_tn] \
                 .groupBy("anthill_id") \
-                .agg(F.sum("searching_food").alias(foods_in_transit)) 
+                .agg(F.sum(1 - F.col("searching_food")).alias(foods_in_transit)) 
 
         # Compute the probability of winning, which is proportional to 
         # `foods_in_deposit` 
