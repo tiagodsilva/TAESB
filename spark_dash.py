@@ -120,7 +120,11 @@ def execute_query(query: str):
             cursor_factory=psycopg2.extras.RealDictCursor
     ) 
     # Execute query 
-    cursor.execute(query) 
+    try: 
+        cursor.execute(query) 
+    except psycopg2.errors.InFailedSqlTransaction: 
+        return list() 
+
     # Fetch instances 
     values = cursor.fetchall() 
     # Update cursor 
@@ -165,6 +169,9 @@ def update_global(n_intervals: int):
 FROM stats_global;""" 
     stats = execute_query(query)[0] # Initial row 
     
+    if len(stats) < 1: 
+        return html.Pre("There are no instances in the database!") 
+
     # Modify the format of the JSON: 
     # instead of `key`: `value`, in which 
     # `key` equals the column name in the database, 
@@ -214,6 +221,8 @@ def update_scenario(value: str):
 WHERE scenario_id = '{scenario_id}';""".format(scenario_id=value)  
     scenarios = execute_query(query_scenarios)[0] # Initial row 
    
+    if len(scenarios) < 1: 
+        return html.Pre("There are no instances in the database.") 
     # Modify the attributes' names 
     display_scenarios = { 
             "scenario_id": "Scenario ID", 
