@@ -2,7 +2,6 @@
 Implement the features of the Flask application. 
 """ 
 from celery import Celery 
-from ..utils.CelerySpark import CeleryPostgres
 from ..SparkConf import BROKER_URL  
 import os 
 
@@ -10,7 +9,7 @@ import os
 from typing import Dict 
 
 # Instantiate an application 
-app = CeleryPostgres( 
+app = Celery( 
         main="taesb", 
         broker=BROKER_URL, 
         include=["taesb.celery.tasks"]

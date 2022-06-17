@@ -75,7 +75,7 @@ magnifier = html.Div(
             ), 
                 dcc.Interval( 
                     id="intervalSelect", 
-                    interval=5e3, 
+                    interval=199, 
                     n_intervals=0 
             ) 
         ]), 

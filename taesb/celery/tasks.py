@@ -6,13 +6,7 @@ from celery.signals import worker_process_init, worker_process_shutdown
 from celery.schedules import crontab 
 
 from ..utils import CallbacksList 
-# SPARK_* files 
-from ..SparkConf import * 
-
-import pyspark 
-from pyspark.sql import SparkSession 
-import pyspark.sql.functions as F 
-
+from ..utils.CelerySpark import DatabaseTask
 # Database 
 import psycopg2 
 
@@ -28,8 +22,8 @@ from typing import Dict
 
 DEBUG = True 
 
-@app.task(priority=9) 
-def initialize_database(global_map: Dict): 
+@app.task(base=DatabaseTask, bind=True, priority=9) 
+def initialize_database(self, global_map: Dict): 
     """ 
     Initialize the database, inserting the instances and their keys; subsequent queries 
     would be executed in parallel. 
@@ -44,55 +38,60 @@ def initialize_database(global_map: Dict):
     ] 
     print("\n".join(queries)) 
     # Execute each query 
-    app.execute_query(
+    cursor = self.db_conn.cursor() 
+    cursor.execute(
             "\n".join(queries) 
     ) 
+    cursor.close() 
 
-@app.task(priority=5) 
-def update_ants(global_map: Dict): 
+def update_ants(cursor: psycopg2.extensions.cursor, global_map: Dict): 
     """ 
     Update the `ants` table. 
     """ 
     query = INSERT_ANTS(global_map["ants"]) 
-    app.execute_query(query) 
+    cursor.execute(query) 
 
-@app.task(priority=6) 
-def update_anthills(global_map: Dict): 
+def update_anthills(cursor: psycopg2.extensions.cursor, global_map: Dict): 
     """ 
     Update the `anthills` table. 
     """ 
     query = INSERT_ANTHILLS(global_map["anthills"], global_map["scenario_id"]) 
-    app.execute_query(query) 
+    cursor.execute(query) 
 
-@app.task(priority=8) 
-def update_scenarios(global_map: Dict): 
+def update_scenarios(cursor: psycopg2.extensions.cursor, global_map: Dict): 
     """  
     Update the `scenarios` table. 
     """ 
     query = INSERT_SCENARIOS(global_map["scenario_id"], global_map["execution_time"], 
             global_map["active"]) 
-    app.execute_query(query) 
+    cursor.execute(query) 
 
-@app.task(priority=7) 
-def update_foods(global_map: Dict): 
+def update_foods(cursor: psycopg2.extensions.cursor, global_map: Dict): 
     """ 
     Update the `foods` table. 
     """ 
     query = INSERT_FOODS(global_map["foods"], global_map["scenario_id"]) 
-    app.execute_query(query) 
+    cursor.execute(query) 
 
-@worker_process_init.connect 
-def init_worker(**kwargs): 
+@app.task(base=DatabaseTask, bind=True) 
+def update_db(self, global_map: Dict): 
     """ 
-    Instantiate a connection to the data base. 
+    Update the database. 
     """ 
-    print("Initializing connection to the database") 
-    app._init_database( 
-            host=POSTGRESQL_HOST, 
-            database=POSTGRESQL_DATABASE, 
-            user=POSTGRESQL_USER, 
-            password=POSTGRESQL_PASSWORD, 
-    ) 
+    # Instantiate a cursor 
+    cursor = self.db_conn.cursor() 
+    update_scenarios(cursor, global_map) 
+    update_anthills(cursor, global_map) 
+    update_foods(cursor, global_map) 
+    update_ants(cursor, global_map) 
+    cursor.close() 
+
+@app.task(base=DatabaseTask, bind=True)
+def shutdown_db(self): 
+    """ 
+    Shutdown the database. 
+    """ 
+    self.db_conn.close() 
 
 @worker_process_shutdown.connect 
 def shutdown_worker(**kwargs): 
@@ -101,5 +100,5 @@ def shutdown_worker(**kwargs):
     """ 
     # Update data base access 
     print("Shutdown worker") 
-    app.db_conn.close() 
+    shutdown_db() 
 
