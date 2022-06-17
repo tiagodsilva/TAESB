@@ -80,7 +80,6 @@ magnifier = html.Div(
             ) 
         ]), 
         html.Div( 
-            className="second-plot", 
             id="magnify", 
         )
     ]) 
@@ -102,6 +101,8 @@ app.layout = html.Div(
         html.Div( 
             children=[
                 layout, 
+                html.Hr(), 
+                html.Pre("Choose a scenario!"), 
                 magnifier
             ]
         ) 
@@ -145,7 +146,23 @@ def update_global(n_intervals: int):
     Update global aspects about the simulation in the Dashboard. 
     """ 
     # Capture the data 
-    query = "SELECT * FROM stats_global;" 
+    query = """SELECT 
+    n_scenarios,
+    n_anthills, 
+    n_ants_searching_food, 
+    n_ants, 
+    foods_in_anthills
+    foods_in_deposit, 
+    foods_in_transit, 
+    foods_total, 
+    avg_execution_time, 
+    fst_scenario_time, 
+    fst_scenario_id, 
+    slw_scenario_time, 
+    slw_scenario_id, 
+    avg_ant_food, 
+    max_ant_food 
+FROM stats_global;""" 
     stats = execute_query(query)[0] # Initial row 
     
     # Modify the format of the JSON: 
@@ -153,9 +170,28 @@ def update_global(n_intervals: int):
     # `key` equals the column name in the database, 
     # use 'keys': data.keys, 'values': data.values 
     data = dict() 
+
+    display_data = { 
+            "stat_id": "Stat ID", 
+            "n_scenarios": "Scenarios", 
+            "n_anthills": "Anthills", 
+            "n_ants_searching_food": "Ants seeking foods", 
+            "n_ants": "Ants", 
+            "foods_in_anthills": "Foods in anthills", 
+            "foods_in_deposit": "Foods in deposit", 
+            "foods_in_transit": "Foods in transit", 
+            "foods_total": "Foods in total", 
+            "avg_execution_time": "Average execution time", 
+            "fst_scenario_time": "Fastest scenario time", 
+            "slw_scenario_time": "Logiest scenario", 
+            "fst_scenario_id": "Fastest scenario ID", 
+            "slw_scenario_id": "Logiest scenario ID", 
+            "avg_ant_food": "Average foods units captured by the ants", 
+            "max_ant_food": "Maximum foods units captured by an ant" 
+    } 
     items = [(key, stats[key]) for key in stats.keys()] 
     data = [{
-        "Attributes": attr, 
+        "Attributes": display_data[attr], 
         "Values": val 
     } for attr, val in items] 
 
@@ -178,16 +214,57 @@ def update_scenario(value: str):
 WHERE scenario_id = '{scenario_id}';""".format(scenario_id=value)  
     scenarios = execute_query(query_scenarios)[0] # Initial row 
    
-    # Instantiate a data frame with the data for this scenario 
+    # Modify the attributes' names 
+    display_scenarios = { 
+            "scenario_id": "Scenario ID", 
+            "n_anthills": "Anthills", 
+            "n_ants": "Ants", 
+            "n_foods": "Foods", 
+            "execution_time": "Execution Time", 
+            "active": "Active" 
+    } 
+
     data_scenarios = [ 
-            {"Attributes": attr, 
+            {"Attributes": display_scenarios[attr], 
             "Values": val 
         } for attr, val in scenarios.items()] 
 
-    return dash_table.DataTable( 
+    # ANthills' data 
+    query_anthills = """SELECT 
+    anthill_id, 
+    n_ants, 
+    n_ants_searching_food, 
+    foods_in_anthills, 
+    foods_in_transit, 
+    probability 
+FROM stats_atomic 
+WHERE scenario_id = '{scenario_id}';""".format(scenario_id=value) 
+    anthills = pd.DataFrame(execute_query(query_anthills)) 
+
+    display_anthills = { 
+            "anthill_id": "ID", 
+            "n_ants": "Ants", 
+            "n_ants_searching_food": "Ants seeking food", 
+            "foods_in_anthills": "Foods in deposit", 
+            "foods_in_transit": "Foods in transit", 
+            "probability": "Winning chances" 
+    } 
+    
+    return [ 
+        html.Pre("Data for this scenario."), 
+        dash_table.DataTable( 
             data_scenarios, 
             columns=[{"name": i, "id": i} for i in ["Attributes", "Values"]] 
-    ) 
+        ), 
+        html.Hr(), 
+        html.Pre(
+            "Data for each anthill within the scenario {scenario}." \
+                    .format(scenario=value)), 
+        dash_table.DataTable( 
+            anthills.to_dict("records"), 
+            columns=[{"name": display_anthills[i], "id": i} for i in anthills.keys()] 
+        ) 
+    ] 
 
 if __name__ == '__main__':
     app.run_server(debug=True)
