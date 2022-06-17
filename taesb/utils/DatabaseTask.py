@@ -8,9 +8,6 @@ import glob
 
 # Applications 
 from celery import Task 
-
-from ..SparkConf import * 
-
 import psycopg2 
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT 
 
@@ -31,10 +28,10 @@ class DatabaseTask(Task):
         if self._db_conn is None: 
             # Persitent access to the data base 
             self._db_conn = psycopg2.connect( 
-                    host=POSTGRESQL_HOST, 
-                    database=POSTGRESQL_DATABASE, 
-                    user=POSTGRESQL_USER,
-                    password=POSTGRESQL_PASSWORD
+                    host=os.environ["POSTGRESQL_HOST"], 
+                    database=os.environ["POSTGRESQL_DATABASE"], 
+                    user=os.environ["POSTGRESQL_USER"],
+                    password=os.environ["POSTGRESQL_PASSWORD"]
             ) 
             # Guarantee that the transactions' are autocommited 
             self._db_conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)         

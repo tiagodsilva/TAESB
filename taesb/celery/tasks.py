@@ -6,7 +6,7 @@ from celery.signals import worker_process_init, worker_process_shutdown
 from celery.schedules import crontab 
 
 from ..utils import CallbacksList 
-from ..utils.CelerySpark import DatabaseTask
+from ..utils.DatabaseTask import DatabaseTask
 # Database 
 import psycopg2 
 

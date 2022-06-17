@@ -11,10 +11,6 @@ import pyspark
 from pyspark.sql import SparkSession 
 import pyspark.sql.functions as F 
 from pyspark.conf import SparkConf 
-
-# Import SPARK_* variables 
-from ..SparkConf import * 
-
 import psycopg2 
 import time 
 import sched 
@@ -31,10 +27,10 @@ class ScheduleSpark(object):
     
     def __init__(self, 
             app_name: str, 
-            database_name: str=POSTGRESQL_DATABASE, 
-            database_host: str=POSTGRESQL_HOST, 
-            database_user: str=POSTGRESQL_USER, 
-            database_pwd: str=POSTGRESQL_PASSWORD): 
+            database_name: str=os.environ["POSTGRESQL_DATABASE"], 
+            database_host: str=os.environ["POSTGRESQL_HOST"], 
+            database_user: str=os.environ["POSTGRESQL_USER"], 
+            database_pwd: str=os.environ["POSTGRESQL_PASSWORD"]): 
         """ 
         Constructor method for ScheduleSpark. 
         """ 
@@ -47,10 +43,10 @@ class ScheduleSpark(object):
         # and start a Spark session 
         self.spark_session = SparkSession \
                 .builder \
-                .config("spark.jars", SPARK_JARS) \
-                .config("spark.master", SPARK_MASTER) \
-                .config("spark.ui.enabled", SPARK_UI_ENABLED) \
-                .config("spark.driver.host", SPARK_DRIVER_HOST) \
+                .config("spark.jars", os.environ["SPARK_JARS"]) \
+                .config("spark.master", os.environ["SPARK_MASTER"]) \
+                .config("spark.ui.enabled", os.environ["SPARK_UI_ENABLED"]) \
+                .config("spark.driver.host", os.environ["SPARK_DRIVER_HOST"]) \
                 .getOrCreate() 
         
         # Update log level 
