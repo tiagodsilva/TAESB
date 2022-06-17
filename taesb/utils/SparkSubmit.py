@@ -14,10 +14,11 @@ from pyspark.conf import SparkConf
 
 # Import SPARK_* variables 
 sys.path.append("..") 
-from SparkConf import *
+from SparkConf import * 
 
 import psycopg2 
 import time 
+import sched 
 import json 
 
 # Docs 
@@ -52,6 +53,10 @@ class ScheduleSpark(object):
                 .config("spark.ui.enabled", SPARK_UI_ENABLED) \
                 .config("spark.driver.host", SPARK_DRIVER_HOST) \
                 .getOrCreate() 
+        
+        # Update log level 
+        sc = self.spark_session.sparkContext 
+        sc.setLogLevel("ERROR") 
 
         # Iniitialize the data base 
         self.init_db() 
@@ -310,13 +315,14 @@ ON CONFLICT (scenario_id)
         Update the appropriate data in the analytical database.
         """
         # print("Update the database, Luke!")
+        print("[INFO]: Execute query") 
         # Read the tables
         ants_tn = "ants" # the suffix `tn` stands for table name  
         anthills_tn = "anthills" 
         foods_tn = "foods" 
         scenarios_tn = "scenarios" 
         tables_names = [ants_tn, anthills_tn, foods_tn, scenarios_tn]
-
+        
         # And instantiate a container for the data frames
         tables = {
             dbtable:None for dbtable in tables_names
@@ -671,19 +677,23 @@ ON CONFLICT (scenario_id)
         """ 
         Schedule a job. 
         """ 
+        # Intantiate scheduler 
+        scheduler = sched.scheduler(time.time, time.sleep) 
+    
         start = time.time() 
-        # Execute until timeout 
         while True: 
-            if (time.time() - start) %  stamp ==  0: 
-                print("[INFO]: Execute query") 
-                # Update the data base 
-                self.update_stats() # Should compute the quantities 
+            # Execute the scheduler 
+            scheduler.enter( 
+                    stamp, 
+                    priority=1, 
+                    action=self.update_stats 
+            )
+            scheduler.run() 
             
-            # Check timeout 
-            if timeout is not None and \
-                    time.time() - start > timeout: 
+            # Check the execution length  
+            if timeout is not None and time.time() - start > timeout: 
                 return 
-       
+
 if __name__ == "__main__": 
     # Capture Spark's configurations 
     # Instantiate a session for Spark 
@@ -692,6 +702,5 @@ if __name__ == "__main__":
             database_host=POSTGRESQL_HOST, 
             database_user=POSTGRESQL_USER, 
             database_pwd=POSTGRESQL_PASSWORD) 
-    
-    spark.schedule(stamp=2)
-   
+    spark.schedule(stamp=5) 
+
