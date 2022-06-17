@@ -8,20 +8,14 @@ import plotly.graph_objs as go
 
 import psycopg2 
 import psycopg2.extras 
-
-# Capture credentials to access the data base 
-from taesb.SparkConf import POSTGRESQL_HOST, \
-        POSTGRESQL_USER, \
-        POSTGRESQL_PASSWORD, \
-        POSTGRESQL_DATABASE 
 #####################################################################
 # POSTGRESQL SQL CONNECTION
 #####################################################################
 db_conn = psycopg2.connect( 
-        host=POSTGRESQL_HOST, 
-        user=POSTGRESQL_USER, 
-        password=POSTGRESQL_PASSWORD, 
-        database=POSTGRESQL_DATABASE 
+        host=os.environ["POSTGRESQL_HOST"], 
+        user=os.environ["POSTGRESQL_USER"], 
+        password=os.environ["POSTGRESQL_PASSWORD"], 
+        database=os.environ["POSTGRESQL_DATABASE"] 
 ) 
 
 #####################################################################
