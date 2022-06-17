@@ -28,7 +28,7 @@ from typing import Dict
 
 DEBUG = True 
 
-@app.task() 
+@app.task(priority=9) 
 def initialize_database(global_map: Dict): 
     """ 
     Initialize the database, inserting the instances and their keys; subsequent queries 
@@ -48,7 +48,7 @@ def initialize_database(global_map: Dict):
             "\n".join(queries) 
     ) 
 
-@app.task() 
+@app.task(priority=5) 
 def update_ants(global_map: Dict): 
     """ 
     Update the `ants` table. 
@@ -56,7 +56,7 @@ def update_ants(global_map: Dict):
     query = INSERT_ANTS(global_map["ants"]) 
     app.execute_query(query) 
 
-@app.task() 
+@app.task(priority=6) 
 def update_anthills(global_map: Dict): 
     """ 
     Update the `anthills` table. 
@@ -64,7 +64,7 @@ def update_anthills(global_map: Dict):
     query = INSERT_ANTHILLS(global_map["anthills"], global_map["scenario_id"]) 
     app.execute_query(query) 
 
-@app.task() 
+@app.task(priority=8) 
 def update_scenarios(global_map: Dict): 
     """  
     Update the `scenarios` table. 
@@ -73,7 +73,7 @@ def update_scenarios(global_map: Dict):
             global_map["active"]) 
     app.execute_query(query) 
 
-@app.task() 
+@app.task(priority=7) 
 def update_foods(global_map: Dict): 
     """ 
     Update the `foods` table. 

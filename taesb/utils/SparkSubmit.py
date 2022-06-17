@@ -305,7 +305,6 @@ ON CONFLICT (scenario_id)
             
             # Append the query to the list 
             queries.append(anthill_query) 
-
         # Execute the DML queries 
         self.execute_query("\n".join(queries)) 
 
@@ -619,14 +618,14 @@ ON CONFLICT (scenario_id)
         # `foods_in_deposit` 
         total_foods_in_deposit = tables[anthills_tn] \
                 .groupBy("scenario_id") \
-                .agg(F.sum("food_storage").alias("total_foods")) 
+                .agg(F.sum(F.col("food_storage") + 1).alias("total_foods")) 
 
         data[probability] = tables[anthills_tn].join( 
                 total_foods_in_deposit, 
                 on="scenario_id", 
                 how="inner"
         ).select(["scenario_id", "anthill_id", "food_storage", "total_foods"]) \
-                .withColumn(probability, F.col("food_storage")/F.col("total_foods")) 
+                .withColumn(probability, (F.col("food_storage") + 1)/F.col("total_foods")) 
 
         # Join the tables 
         datatb = data[n_ants] 
