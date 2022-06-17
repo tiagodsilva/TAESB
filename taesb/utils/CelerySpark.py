@@ -13,6 +13,7 @@ from pyspark.sql import SparkSession, \
         functions as F 
 
 import psycopg2 
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT 
 
 # IO 
 import warnings 
@@ -42,7 +43,8 @@ class CeleryPostgres(Celery):
                 user=user,
                 password=password 
         ) 
-        
+        # Guarantee that the transactions' are autocommited 
+        self.db_conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)         
         # Use data base attributes 
         self.database = database 
 
@@ -56,7 +58,3 @@ class CeleryPostgres(Celery):
         cur.execute(query) 
         # and commit the changes 
         cur.close() 
-        self.db_conn.commit() 
-
-
-

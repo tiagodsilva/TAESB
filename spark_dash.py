@@ -80,6 +80,7 @@ magnifier = html.Div(
             ) 
         ]), 
         html.Div( 
+            className="second-plot", 
             id="magnify", 
         )
     ]) 
@@ -163,6 +164,30 @@ def update_global(n_intervals: int):
             columns=[{"name": i, "id": i} for i in data[1].keys()] 
     )] 
 
+@app.callback(Output("magnify", "children"), 
+        [Input("availableScenarios", "value")]) 
+def update_scenario(value: str): 
+    """ 
+    Update the specific data for the chosen scenario. 
+    """ 
+    # Check the current value 
+    if value == "NULL": 
+        return 
+    # Scenario data 
+    query_scenarios = """SELECT * FROM stats_local 
+WHERE scenario_id = '{scenario_id}';""".format(scenario_id=value)  
+    scenarios = execute_query(query_scenarios)[0] # Initial row 
+   
+    # Instantiate a data frame with the data for this scenario 
+    data_scenarios = [ 
+            {"Attributes": attr, 
+            "Values": val 
+        } for attr, val in scenarios.items()] 
+
+    return dash_table.DataTable( 
+            data_scenarios, 
+            columns=[{"name": i, "id": i} for i in ["Attributes", "Values"]] 
+    ) 
 
 if __name__ == '__main__':
     app.run_server(debug=True)
