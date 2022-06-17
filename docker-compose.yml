@@ -1,0 +1,11 @@
+version: '3' 
+services: 
+        rabbitmq: 
+                image: rabbitmq:latest 
+        worker: 
+                build: 
+                        context: . 
+                        dockerfile: Dockerfile 
+                image: 812df205e9b6
+                command: ['celery', '-A', 'taesb', 'worker', '-l', 'INFO'] 
+
