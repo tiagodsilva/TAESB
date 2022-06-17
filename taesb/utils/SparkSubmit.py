@@ -31,10 +31,10 @@ class ScheduleSpark(object):
     
     def __init__(self, 
             app_name: str, 
-            database_name: str, 
-            database_host: str, 
-            database_user: str, 
-            database_pwd: str): 
+            database_name: str=POSTGRESQL_DATABASE, 
+            database_host: str=POSTGRESQL_HOST, 
+            database_user: str=POSTGRESQL_USER, 
+            database_pwd: str=POSTGRESQL_PASSWORD): 
         """ 
         Constructor method for ScheduleSpark. 
         """ 
