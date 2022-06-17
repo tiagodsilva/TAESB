@@ -13,8 +13,7 @@ import pyspark.sql.functions as F
 from pyspark.conf import SparkConf 
 
 # Import SPARK_* variables 
-sys.path.append("..") 
-from SparkConf import * 
+from ..SparkConf import * 
 
 import psycopg2 
 import time 
