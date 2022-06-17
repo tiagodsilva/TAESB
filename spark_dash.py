@@ -4,6 +4,7 @@ from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output 
 import pandas as pd
 
+import os
 import plotly.graph_objs as go
 
 import psycopg2 
