@@ -7,6 +7,7 @@ from celery.schedules import crontab
 
 from ..utils import CallbacksList 
 from ..utils.DatabaseTask import DatabaseTask
+from ..utils.BenchmarkTask import BenchmarkTask 
 # Database 
 import psycopg2 
 
@@ -95,19 +96,12 @@ def shutdown_db(self):
     self.db_conn.close() 
 
 @app.task(base=BenchmarkTask, bind=True, priority=9) 
-def benchmark(self, scenario_id): 
+def benchmark(self, global_map: Dict): 
     """ 
     Compute the execution time for this pipeline. 
     """ 
-    if self.start_time is None: 
-        self.start(scenario_id, time.time()) 
-    else: 
-        self.current(scenario_id, time.time()) 
-        
-        # Insert the data for the current scenario in the database 
-        query = BENCHMARKS(self.current_time, self.start_time) 
-        # Send the data to the database 
-        self.update_benchmarks(query) 
+    self.update_benchmarks(global_map["scenario_id"]) 
+
 
 @app.task(base=DatabaseTask, bind=True, priority=1) 
 def update_benchmark(self, query: str): 
