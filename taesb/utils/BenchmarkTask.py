@@ -9,25 +9,35 @@ import glob
 # Celery 
 from celery import Task 
 
-class BenchmarkTask(task): 
+# PostgreSQL 
+import psycopg2 
+
+class BenchmarkTask(Task): 
     """ 
     A class to benchmark Celery's workers. 
     """ 
-    # The boundaries of the execution time 
-    _start_times: Dict[str, int] = None 
     
+    _db_conn: psycopg2.extensions.connection = None 
+
     def init_db(self): 
         """ 
         Initialize the access to the data base. 
         """ 
-        self.db_conn = psyocpg2.connect( 
-                host=os.enviorn["POSTGRESQL_HOST"], 
+        self._db_conn = psycopg2.connect( 
+                host=os.environ["POSTGRESQL_HOST"], 
                 user=os.environ["POSTGRESQL_USER"], 
                 password=os.environ["POSTGRESQL_PASSWORD"], 
                 database=os.environ["POSTGRESQL_DATABASE"] 
         ) 
 
-    def update_time(self, scenario_id: str): 
+    @property 
+    def db_conn(self): 
+        """ 
+        The pointer to the database. 
+        """ 
+        return self._db_conn 
+    
+    def update_benchmarks(self, scenario_id: str): 
         """ 
         Update the pipeline's benchmarking. 
         """ 

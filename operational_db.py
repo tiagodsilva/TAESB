@@ -117,6 +117,14 @@ DB_CREATE_ATOMIC = """CREATE TABLE IF NOT EXISTS stats_atomic (
     PRIMARY KEY(scenario_id, anthill_id) 
 );""" 
 
+DB_CREATE_BENCHMARKS = """CREATE TABLE IF NOT EXISTS benchmarks ( 
+    id SERIAL PRIMARY KEY, 
+    scenario_id VARCHAR(256), 
+    current_time DATETIME, 
+    CONSTRAINT FOREIGN KEY(scenario_id) 
+        REFERENCES scenarios(scenario_id) 
+);""" 
+
 # Database attributes 
 HOST = "database-postgres-tjg.cvb1csfwepbn.us-east-1.rds.amazonaws.com" 
 USER = "postgres" 
@@ -158,6 +166,7 @@ def init_db(
         cursor.execute(DB_CREATE_GLOBAL) 
         cursor.execute(DB_CREATE_LOCAL) 
         cursor.execute(DB_CREATE_ATOMIC) 
+        cursor.execute(DB_CREATE_BENCHMARKS) 
     else: 
         # Drop all tables 
         cursor.execute(DROP_TABLES) 

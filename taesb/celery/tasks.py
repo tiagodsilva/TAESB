@@ -102,13 +102,6 @@ def benchmark(self, global_map: Dict):
     """ 
     self.update_benchmarks(global_map["scenario_id"]) 
 
-
-@app.task(base=DatabaseTask, bind=True, priority=1) 
-def update_benchmark(self, query: str): 
-    """ 
-    Insert the benchmark data in the database. 
-    """ 
-    
 @worker_process_shutdown.connect 
 def shutdown_worker(**kwargs): 
     """ 

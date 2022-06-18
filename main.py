@@ -81,17 +81,23 @@ with the format x[int],y[int],volume[int];...;x[int],y[int],volume[int].",
             type=bool, default=False) 
     parser.add_argument("--max_foods", help="The quantity of foods for an anthill be characterized as the winner", 
             type=int, default=config.MAX_FOODS) 
+    parser.add_argument("--benchmarks", help="Whether to benchmark the pipeline.", 
+            action="store_true") 
+
     return parser.parse_args() 
 
 def main(args): 
     """ 
     Initialize the simulation. 
     """ 
+    callbacks = [tasks.update_db] 
+
+    if args.benchmarks: 
+        callbacks += [tasks.benchmark] 
+
     callbacks = taesb.CallbacksList( 
-          initialize = tasks.initialize_database,      
-          callbacks = [# tasks.current_foods, 
-            tasks.update_db, 
-        ] 
+          initialize=tasks.initialize_database,      
+          callbacks=callbacks 
     ) 
 
     # Instantiate a map 
