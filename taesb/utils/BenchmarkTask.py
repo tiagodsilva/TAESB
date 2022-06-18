@@ -44,9 +44,10 @@ class BenchmarkTask(Task):
         Update the pipeline's benchmarking. 
         """ 
         # Generate the current query 
-        query = """INSERT INTO benchmarks 
+        query = """SET TIMEZONE='America/Los_angeles'; 
+INSERT INTO benchmarks 
         (scenario_id, 
-        current) 
+        computed_at) 
     VALUES 
         ('{scenario_id}', 
         now());""".format(scenario_id=scenario_id) 

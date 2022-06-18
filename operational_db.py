@@ -121,7 +121,7 @@ DB_CREATE_ATOMIC = """CREATE TABLE IF NOT EXISTS stats_atomic (
 DB_CREATE_BENCHMARKS = """CREATE TABLE IF NOT EXISTS benchmarks ( 
     id SERIAL PRIMARY KEY, 
     scenario_id VARCHAR(256), 
-    current_time DATE, 
+    computed_at TIMESTAMPTZ DEFAULT Now(), 
     CONSTRAINT fk_scenario_id 
         FOREIGN KEY(scenario_id) 
             REFERENCES scenarios(scenario_id) 

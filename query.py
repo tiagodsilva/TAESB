@@ -3,10 +3,13 @@ Query the database.
 """ 
 # Import the application 
 import taesb 
+import os 
 
 # Access to the database 
 import psycopg2 
 import pandas as pd 
+import psycopg2.extras 
+import tabulate 
 
 # Docs 
 import argparse 
@@ -20,9 +23,9 @@ def parse_args():
     
     # Insert parameters for the command line 
     parser.add_argument("--query", help="Query to the database (with SQL format).", 
-            type=str) 
+            type=str, required=True) 
 
-    args = parser.parser_args() 
+    args = parser.parse_args() 
     
     # Return the parsed args 
     return args 
@@ -31,7 +34,7 @@ def conn():
     """ 
     Access the database. 
     """ 
-    db_conn = pycopg2.connect( 
+    db_conn = psycopg2.connect( 
             host=os.environ["POSTGRESQL_HOST"], 
             database=os.environ["POSTGRESQL_DATABASE"], 
             user=os.environ["POSTGRESQL_USER"], 
@@ -61,7 +64,7 @@ def main():
     # Instantiate a data frame with the data 
     dataframe = pd.DataFrame(values) 
 
-    print(tabulate(dataframe, header="keys", 
+    print(tabulate.tabulate(dataframe, headers="keys", 
         tablefmt="psql")) 
 
 if __name__ == "__main__": 
