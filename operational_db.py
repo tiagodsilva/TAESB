@@ -12,7 +12,8 @@ DROP TABLE IF EXISTS ants CASCADE;
 DROP TABLE IF EXISTS foods CASCADE; 
 DROP TABLE IF EXISTS stats_global CASCADE; 
 DROP TABLE IF EXISTS stats_local CASCADE; 
-DROP TABLE IF EXISTS stats_atomic CASCADE;""" 
+DROP TABLE IF EXISTS stats_atomic CASCADE; 
+DROP TABLE IF EXISTS benchmarks CASCADE;""" 
 
 # Create the database; workaround to check table's existence 
 DATABASE = "operational_tjg" 
@@ -120,9 +121,10 @@ DB_CREATE_ATOMIC = """CREATE TABLE IF NOT EXISTS stats_atomic (
 DB_CREATE_BENCHMARKS = """CREATE TABLE IF NOT EXISTS benchmarks ( 
     id SERIAL PRIMARY KEY, 
     scenario_id VARCHAR(256), 
-    current_time DATETIME, 
-    CONSTRAINT FOREIGN KEY(scenario_id) 
-        REFERENCES scenarios(scenario_id) 
+    current_time DATE, 
+    CONSTRAINT fk_scenario_id 
+        FOREIGN KEY(scenario_id) 
+            REFERENCES scenarios(scenario_id) 
 );""" 
 
 # Database attributes 
