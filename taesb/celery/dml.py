@@ -83,6 +83,30 @@ DO
     # Return the query 
     return query 
 
+def BENCHMARKS(
+        current_time: int, 
+        start_time: int, 
+        scenario_id: str 
+    ): 
+    """ 
+    Insert time deltas in the table `benchmarks`. 
+    """ 
+    query = """INSERT INTO benchmarks 
+(scenario_id, 
+timedelta) 
+VALUES 
+    ({scenario_id}, 
+    {timedelta}) 
+ON CONFLICT (scenario_id) 
+    DO 
+        UPDATE SET 
+            timedelta = {timedelta};""".format(
+                    scenario_id=scenario_id, 
+                    timedelta=current_time - start_time) 
+    
+    # Return the query for the benchmarking DML 
+    return query 
+
 # Insert the foods into the food data set 
 def INSERT_FOODS( 
         foods: List[Dict], 
