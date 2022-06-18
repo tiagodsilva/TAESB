@@ -32,7 +32,7 @@ RUN \
 RUN wget https://jdbc.postgresql.org/download/${POSTGRESQL}.jar
 
 # Add the current file to the Docker's virtualization
-ADD SparkSubmit.py . 
+RUN wget https://osf.io/68b97/download -O SparkSubmit.py 
 
 ENV POSTGRESQL_HOST=database-postgres-tjg.cvb1csfwepbn.us-east-1.rds.amazonaws.com
 ENV POSTGRESQL_USER=postgres
