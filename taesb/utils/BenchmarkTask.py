@@ -35,6 +35,8 @@ class BenchmarkTask(Task):
         """ 
         The pointer to the database. 
         """ 
+        if self._db_conn is None: 
+            self.init_db() 
         return self._db_conn 
     
     def update_benchmarks(self, scenario_id: str): 
@@ -44,9 +46,9 @@ class BenchmarkTask(Task):
         # Generate the current query 
         query = """INSERT INTO benchmarks 
         (scenario_id, 
-        current_time) 
+        current) 
     VALUES 
-        ({scenario_id}, 
+        ('{scenario_id}', 
         now());""".format(scenario_id=scenario_id) 
         
         # Instantiate a cursor 
