@@ -3,7 +3,12 @@ from .utils.CallbacksList import CallbacksList
 
 # Environment variables 
 import os 
-os.environ["SPARK_JARS"] = "postgresql-42.3.6.jar" 
+import pathlib 
+
+# Compute the filepath of the current file 
+path = pathlib.Path(os.path.abspath(__file__)).parent  
+
+os.environ["SPARK_JARS"] = str(path / "spark/postgresql-42.3.6.jar") 
 os.environ["SPARK_MASTER"] = "local[8]" 
 os.environ["SPARK_UI_ENABLED"] = "false" 
 os.environ["SPARK_DRIVER_HOST"] = "localhost"

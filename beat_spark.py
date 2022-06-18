@@ -1,7 +1,7 @@
 """ 
 Initiate periodic Spark jobs. 
 """ 
-from taesb.utils.SparkSubmit import ScheduleSpark 
+from taesb.spark.SparkSubmit import ScheduleSpark 
 
 # Interval between a pair of executions 
 STAMP = 5 

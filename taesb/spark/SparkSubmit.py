@@ -54,6 +54,8 @@ class ScheduleSpark(object):
         sc.setLogLevel("ERROR") 
 
         # Iniitialize the data base 
+        # SparkSQL is not absolutely compatible with the queries 
+        # we should execute 
         self.init_db() 
 
     def init_db(self): 
@@ -327,17 +329,7 @@ ON CONFLICT (scenario_id)
             tables[table] = self.read_table(table)
 
         # print(tables)
-
-        # Compute the desired statistics
-        # We send the name of the tables to guarantee 
-        # that these quantities are not reassigned everywhere 
-        local_stats = self.compute_local_stats(tables, 
-                    ants_tn=ants_tn, 
-                    anthills_tn=anthills_tn, 
-                    foods_tn=foods_tn, 
-                    scenarios_tn=scenarios_tn) 
-
-
+        # Compute the desired quantities 
         try: 
             global_stats = self.compute_global_stats(tables,
                     ants_tn=ants_tn,
@@ -378,39 +370,29 @@ ON CONFLICT (scenario_id)
         """ 
         # Generate a table to gather the results 
         data = dict() 
-        
-        data["n_scenarios"] = tables[scenarios_tn].count() 
-    
-        # Join the anthills and ants tables 
-        joint_ants = tables[ants_tn].join( 
-                tables[anthills_tn]  
-        ) 
 
-        ############################################### 
         # Compute the quantity of scenarios 
         data["n_scenarios"] = tables[scenarios_tn].count() 
         # and the quantity of anthills 
-        data["n_anthills"] = tables[anthills_tn].count() 
+        data["n_anthills"], data["foods_in_anthills"] = tables[anthills_tn] \
+                .agg(F.countDistinct("anthill_id"), F.sum("food_storage")) \
+                .collect()[0] 
         
         # and the quantity of foods in deposit 
         data["foods_in_deposit"] = tables[foods_tn] \
                 .agg(F.sum("current_volume")) \
                 .collect()[0][0] 
 
-        # Quantity of ants alive 
-        data["n_ants"] = tables[ants_tn].count() 
-        # and quantity searching food 
-        data["n_ants_searching_food"] = tables[ants_tn] \
-                .agg(F.sum("searching_food")) \
-                .collect()[0][0] 
+        # Quantity of ants alive and quantity searching food 
+        # and the quantities regarding their captures 
+        data["n_ants"], data["n_ants_searching_food"], data["avg_ant_food"], \
+                data["max_ant_food"] = tables[ants_tn] \
+                    .agg(F.countDistinct("ant_id"), F.sum("searching_food"), 
+                            F.mean("captured_food"), F.max("captured_food")) \
+                    .collect()[0] 
 
         # Quantity of foods in transit 
         data["foods_in_transit"] = data["n_ants"] - data["n_ants_searching_food"] 
-
-        # Quantity of foods in the anthills 
-        data["foods_in_anthills"] = tables[anthills_tn] \
-                .agg(F.sum("food_storage")) \
-                .collect()[0][0] 
 
         # Quantity of foods in total 
         data["foods_total"] = data["foods_in_deposit"] + data["foods_in_transit"] + \
@@ -441,13 +423,6 @@ ON CONFLICT (scenario_id)
         data["slw_scenario_id"] = slw_scenario["scenario_id"] 
         data["slw_scenario_time"] = slw_scenario["execution_time"] 
 
-        # Check the ants that captured foods 
-        ants_foods = tables[ants_tn] \
-                .agg(F.avg("captured_food"), F.max("captured_food")) \
-                .collect()[0] 
-
-        data["avg_ant_food"], data["max_ant_food"] = ants_foods 
-        
         # Return the data 
         return data 
     
@@ -673,7 +648,7 @@ ON CONFLICT (scenario_id)
         # Return the current data 
         return data 
     
-    def schedule(self, 
+    def schedule(self, # Local execution  
             stamp: str, 
             timeout: int=None): 
         """ 
