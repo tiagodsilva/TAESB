@@ -13,7 +13,8 @@ import psycopg2
 from .dml import INSERT_ANTS, \
         INSERT_ANTHILLS, \
         INSERT_FOODS, \
-        INSERT_SCENARIOS 
+        INSERT_SCENARIOS, \
+        BENCHMARKS
 
 import time 
 
@@ -93,6 +94,27 @@ def shutdown_db(self):
     """ 
     self.db_conn.close() 
 
+@app.task(base=BenchmarkTask, bind=True, priority=9) 
+def benchmark(self, scenario_id): 
+    """ 
+    Compute the execution time for this pipeline. 
+    """ 
+    if self.start_time is None: 
+        self.start(scenario_id, time.time()) 
+    else: 
+        self.current(scenario_id, time.time()) 
+        
+        # Insert the data for the current scenario in the database 
+        query = BENCHMARKS(self.current_time, self.start_time) 
+        # Send the data to the database 
+        self.update_benchmarks(query) 
+
+@app.task(base=DatabaseTask, bind=True, priority=1) 
+def update_benchmark(self, query: str): 
+    """ 
+    Insert the benchmark data in the database. 
+    """ 
+    
 @worker_process_shutdown.connect 
 def shutdown_worker(**kwargs): 
     """ 
