@@ -665,7 +665,10 @@ ON CONFLICT (scenario_id)
                     priority=1, 
                     action=self.update_stats 
             )
-            scheduler.run() 
+            try: 
+                scheduler.run() 
+            except Exception as err: 
+                print("[ERROR]: {err}, skipping current iteration".format(err=str(err))) 
             
             # Check the execution length  
             if timeout is not None and time.time() - start > timeout: 
