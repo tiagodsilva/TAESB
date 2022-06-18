@@ -32,7 +32,8 @@ RUN \
 RUN wget https://jdbc.postgresql.org/download/${POSTGRESQL}.jar
 
 # Add the current file to the Docker's virtualization
-RUN wget https://osf.io/68b97/download -O SparkSubmit.py 
+# RUN wget https://osf.io/68b97/download -O SparkSubmit.py 
+ADD SparkSubmit.py . 
 
 ENV POSTGRESQL_HOST=database-postgres-tjg.cvb1csfwepbn.us-east-1.rds.amazonaws.com
 ENV POSTGRESQL_USER=postgres
@@ -40,9 +41,7 @@ ENV POSTGRESQL_PASSWORD=passwordpassword
 ENV POSTGRESQL_DATABASE=operational_tjg
 ENV BROKER_URL=amqps://username:passwordpassword@b-7182fca9-4c07-4bfa-be01-72310cb18d60.mq.us-east-1.amazonaws.com:5671
 ENV SPARK_JARS=${POSTGRESQL}.jar
-ENV SPARK_MASTER=local[*]  
 ENV SPARK_UI_ENABLED=false 
-ENV SPARK_DRIVER_HOST=localhost
 # Execute the processing 
 
 CMD ["spark-submit", \

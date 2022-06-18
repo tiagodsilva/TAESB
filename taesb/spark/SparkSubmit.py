@@ -44,9 +44,7 @@ class ScheduleSpark(object):
         self.spark_session = SparkSession \
                 .builder \
                 .config("spark.jars", os.environ["SPARK_JARS"]) \
-                .config("spark.master", os.environ["SPARK_MASTER"]) \
                 .config("spark.ui.enabled", os.environ["SPARK_UI_ENABLED"]) \
-                .config("spark.driver.host", os.environ["SPARK_DRIVER_HOST"]) \
                 .getOrCreate() 
         
         # Update log level 
@@ -660,15 +658,16 @@ ON CONFLICT (scenario_id)
         start = time.time() 
         while True: 
             # Execute the scheduler 
-            scheduler.enter( 
-                    stamp, 
-                    priority=1, 
-                    action=self.update_stats 
-            )
             try: 
+                scheduler.enter( 
+                        stamp, 
+                        priority=1, 
+                        action=self.update_stats 
+                )
                 scheduler.run() 
             except Exception as err: 
                 print("[ERROR]: {err}, skipping current iteration".format(err=str(err))) 
+                continue 
             
             # Check the execution length  
             if timeout is not None and time.time() - start > timeout: 
