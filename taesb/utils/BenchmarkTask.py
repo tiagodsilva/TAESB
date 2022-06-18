@@ -9,37 +9,40 @@ import glob
 # Celery 
 from celery import Task 
 
-# Benchmark 
-import time 
-
 class BenchmarkTask(task): 
     """ 
     A class to benchmark Celery's workers. 
     """ 
     # The boundaries of the execution time 
-    _start_time: int = None 
-    _current_time: int = None 
+    _start_times: Dict[str, int] = None 
     
-    _scenario_id: str = None 
+    def init_db(self): 
+        """ 
+        Initialize the access to the data base. 
+        """ 
+        self.db_conn = psyocpg2.connect( 
+                host=os.enviorn["POSTGRESQL_HOST"], 
+                user=os.environ["POSTGRESQL_USER"], 
+                password=os.environ["POSTGRESQL_PASSWORD"], 
+                database=os.environ["POSTGRESQL_DATABASE"] 
+        ) 
 
-    def start_pipeline(self, scenario_id: str): 
+    def update_time(self, scenario_id: str): 
         """ 
-        Assert the start of the pipeline. 
+        Update the pipeline's benchmarking. 
         """ 
-        self._start_time = time.time() # Persistent across processes 
+        # Generate the current query 
+        query = """INSERT INTO benchmarks 
+        (scenario_id, 
+        current_time) 
+    VALUES 
+        ({scenario_id}, 
+        now());""".format(scenario_id=scenario_id) 
         
-        # Intrudoce the scenario's identifier as an attribute 
-        self._scenario_id = scenario_id 
-    
-    def timedelta(self, scenario_id: str): 
-        """ 
-        Compute the interval to execute the pipeline. 
-        """ 
-        self._current_time = time.time() 
+        # Instantiate a cursor 
+        cursor = self.db_conn.cursor() 
+        cursor.execute(query) 
+        cursor.close() 
         
-        # Check the consistency of the scenario's identifier 
-        self._scenario_id = scenario_id 
-
-        # Return the execution's interval 
-        return self._current_time - self._start_time 
-
+        # Commit the updates to the database 
+        self.db_conn.commit() 
