@@ -28,3 +28,10 @@ RUN pip install celery==${CELERY_PACKAGE} \
 	pandas==${PANDAS_PACKAGE} \
 	pyspark==${PYSPARK_VERSION} 
 
+ENV POSTGRESQL_HOST=database-postgres-tjg.cvb1csfwepbn.us-east-1.rds.amazonaws.com
+ENV POSTGRESQL_USER=postgres
+ENV POSTGRESQL_PASSWORD=passwordpassword
+ENV POSTGRESQL_DATABASE=operational_tjg
+ENV BROKER_URL=amqps://username:passwordpassword@b-7182fca9-4c07-4bfa-be01-72310cb18d60.mq.us-east-1.amazonaws.com:5671
+
+CMD ["celery", "-A", "taesb", "worker", "-l", "INFO"]
