@@ -675,9 +675,9 @@ if __name__ == "__main__":
     # Capture Spark's configurations 
     # Instantiate a session for Spark 
     spark = ScheduleSpark("taesb", 
-            database_name=POSTGRESQL_DATABASE, 
-            database_host=POSTGRESQL_HOST, 
-            database_user=POSTGRESQL_USER, 
-            database_pwd=POSTGRESQL_PASSWORD) 
+            database_name=os.environ["POSTGRESQL_DATABASE"], 
+            database_host=os.environ["POSTGRESQL_HOST"], 
+            database_user=os.environ["POSTGRESQL_USER"], 
+            database_pwd=os.environ["POSTGRESQL_PASSWORD"]) 
     spark.schedule(stamp=5) 
 
