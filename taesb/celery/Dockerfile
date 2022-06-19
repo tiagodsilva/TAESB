@@ -4,7 +4,7 @@ FROM ubuntu:20.04
 ARG CELERY_PACKAGE=5.2.0 
 ARG PSYCOPG2_BINARY=2.9.3 
 
-MAINTAINER My, Myself and I 
+MAINTAINER TJG
 
 # Install system deps 
 RUN apt-get -yqq update 
@@ -24,4 +24,4 @@ ENV POSTGRESQL_PASSWORD=passwordpassword
 ENV POSTGRESQL_DATABASE=operational_tjg
 ENV BROKER_URL=amqps://username:passwordpassword@b-7182fca9-4c07-4bfa-be01-72310cb18d60.mq.us-east-1.amazonaws.com:5671
 
-CMD ["celery", "-A", "celery", "worker", "-l", "FATAL"]
+CMD ["celery", "-A", "celery", "worker", "-l", "INFO"]
