@@ -125,7 +125,8 @@ class ScheduleSpark(object):
 
         # Return the data frame 
         return dataframe 
-
+    
+    @benchmarks(message="Insert global quantities in the database") 
     def _update_global(self, 
             n_scenarios: int, 
             n_anthills: int, 
@@ -218,6 +219,7 @@ ON CONFLICT (stat_id)
 
         self.execute_query(query) 
     
+    @benchmarks(message="Insert the local quantities in the database") 
     def _update_local(self, 
             scenario_id_l: List[str], 
             n_anthills_l: List[int], 
@@ -272,6 +274,7 @@ ON CONFLICT (scenario_id)
         # Execute the queries jointly 
         self.execute_query("\n".join(queries)) 
     
+    @benchmarks("Insert the atomic quantities in the database") 
     def _update_atomic(self, 
             scenario_id_l: List[str], 
             anthill_id_l: List[str], 
@@ -386,6 +389,7 @@ ON CONFLICT (scenario_id)
         self._update_local(**local_stats) 
         self._update_atomic(**atomic_stats) 
 
+    @benchmarks(message="Compute the global quantities") 
     def compute_global_stats(self, 
             tables: Dict[str, pyspark.sql.DataFrame], 
             ants_tn: str, 
@@ -453,6 +457,7 @@ ON CONFLICT (scenario_id)
         # Return the data 
         return data 
     
+    @benchmarks(message="Compute the local quantities") 
     def compute_local_stats(self, 
             tables: pyspark.sql.DataFrame, 
             scenarios_tn: str, 
@@ -570,6 +575,7 @@ ON CONFLICT (scenario_id)
         # Return the aggregated data 
         return data 
     
+    @benchmarks(message="Compute the local quantities") 
     def compute_atomic_stats(self, 
             tables: Dict[str, pyspark.sql.DataFrame], 
             ants_tn: str,
