@@ -48,7 +48,7 @@ plot_1 = html.Div(className="first-plot",
 # TODO: create the second visualization :)
 plot_2 = html.Div(className='second-plot',
         children=[ 
-            html.Div("Second plot here", id="antsStats"), 
+            html.Img(src = "https://i.pinimg.com/originals/1b/66/69/1b66698ba3bf0ec241c236b4df00503a.png", id="antImg"), 
             dcc.Interval( 
                 id="antsStatsInterval", 
                 interval=1e3, 
