@@ -51,7 +51,16 @@
 
 	\noindent Nestas condições, nossas escolhas estão amarradas a compleições objetivas: com respeito a 1, precisaríamos comportar, em nosso sistema, um mecanismo de transferência de informações entre um banco de dados operacional e um analítico, trascendendo, em nossa opinião, o objetivo desta avaliação, que não inclui a modelagem dimensional; com respeito a 2, nossas breves exposições a bancos de dados noSQL (como o MongoDB) culminaram em nossas reticências em os introduzir neste sistema. Neste cenário, nossas escolhas por um banco de dados relacional estão alicerçadas em sua conveniência e na existência de múltiplas ferramentas que permitem a sua integração em um sistema distribuído. 
 
-	Adicionalmente, a distribuição da pipeline ETL em múltiplos nós de computação implicou a escolha de um mecanismo de comunicação; em nossa opinião, este mecanimos deveria (1) ser escalável (isto é, as mensagens têm de ser persistentes e as chamadas, assíncronas; assim, garantimos que os clientes podem interagir com a interface e que seus dados serão inseridos na base de dados), (2) ser transparente (equivalentemente, a sua incorporação ao sistema existente deveria exigir modificações enxutas no código-fonte) e (3), mais importante, compatível com um cenário em que a estrutura subjacente das mensagens (como o tipo de dado e o tamanho) é difusa e variável.   
+	Adicionalmente, a distribuição da pipeline ETL em múltiplos nós de computação implicou a escolha de um mecanismo de comunicação; em nossa opinião, este mecanimos deveria (1) ser escalável (isto é, as mensagens, se existirem, têm de ser persistentes e as chamadas, assíncronas; assim, garantimos que os clientes podem interagir com a interface e que seus dados serão inseridos na base de dados), (2) ser transparente (equivalentemente, a sua incorporação ao sistema existente deveria exigir modificações enxutas no código-fonte) e (3), mais importante, compatível com um cenário em que a estrutura subjacente das mensagens (como o tipo de dado e o tamanho) é difusa e variável. Vislumbramos, nestas condições, um tripleto de procedimentos, que descrevemos em seguida.
+
+	\begin{enumerate} 
+		\item \textit{Remote Procedure Calls}. Apesar de as chamadas remotas permitirem transparência na comunicação e serem compatíveis com o nosso cenário, elas não são apropriadas em um cenário em que não podemos garantir que o receptor será executado quando o requerimento for enviado, como o nosso, em que múltiplos clientes podem interagir com uma quantidade enxuta de servidores. 
+		\item \textit{Message Passing Interface}. A interface de passagem de mensagens, por outro lado, não é compatível com o sistema que desejamos, na medida em que sua utilização está amarrada à estimativas do tamanho da mensagem, que, em nosso cenário, não estão disponíveis. Mais crucialmente, a introdução desse mecanismo exige, em alguns casos, a escolha cautelosa dos processos responsáveis pelo processamento das mensagens. Logo, em oposição à sua abstração conveniente e à sua flexibilidade, esta interface é inadequada para o que almejamos. 
+		\item \textit{Publish-Subscribe}. Nestas circunstâncias, o publish-subscribe permite, em oposição às chamadas de procedimento remotas, o processamento subsequente de mensagens, que são persistentes, em um momento posterior ao seu envio pelo produtor (comunicação assíncrona); em oposição à interface de passagem de mensagens, ele é consistente com o nosso sistema, com uma implementação que não subverte o código-fonte inicial. 
+	\end{enumerate} 
+
+	\noindent Neste sentido, escolhemos o mecanismo de comunicação por mensagens persistentes publish-subscribe para o gerenciamento da comunicação entre os nós de processmaneto. Utilizamos, para isso, a biblioteca \texttt{Celery}, em \texttt{Python}, que providencia uma implementação eficiente deste mecanismo. Precisávamos, assim, de um broker para garantir a integração consistente de múltiplas máquninas em um sistema distribuído; escolhemos, portanto, a implementação do \texttt{RabbitMQ} por sua popularidade\footnote{Serviços populares, com uma comunidade mais extensa, permitem que usuários possam instanciar uma rede de apoio mútuo que incrementa a eficiência do desenvolvimento de \textit{software}.} e por sua acessibilidade em servições de computação em nuvem, como a AWS (AmazonMQ; veja a Seção~\ref{sec:mq}). 
+
 
 \subsection{Extração}
 \subsection{Transformação}
@@ -62,7 +71,7 @@
     
     Dito isso, para esse trabalho utilizamos alguns dos serviços de nuvem da Amazon Web Services, a fim de agregar mais robustez ao nosso pipeline de dados. Assim, veremos agora quais recursos foram utilizados e informações das instâncias criadas em cada um deles.
 
-\subsection{AmazonMQ}
+\subsection{AmazonMQ} \label{sec:mq} 
     Uma vez que utilizamos o RabbitMQ como broker, temos o AmazonMQ como serviço de gerenciamento de mensagens na AWS para criar uma instância com o RabbitMQ.
     
     Ao instanciar com as opções devidamente escolhidas, ficamos com as seguintes informações
