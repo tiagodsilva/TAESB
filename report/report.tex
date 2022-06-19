@@ -74,6 +74,7 @@ Nestas veredas, a etapa de transformação está amarrada à captura das mensage
 
 \subsection{Carregamento}
 
+Enfaticamente, portanto, os dados transformados estavam receptivos ao seu carregamento na base de dados; executamos, para isso, as operações de inserção e de atualização propiciadas pelo sistema de gerenciamento de banco de dados utilizado, PostgreSQL, e sua interface em \texttt{Python}, \texttt{psycopg2} (versão 2.9.3). Crucialmente, a eficiência deste estágio está correlacionada aos protolocos de comunicação utilizados pela rede subjacente; em nossos experimentos, contudo, este aspecto não consistia em um gargalo computacional. 
 
 \section{Armazenamento em nuvem (AWS)}
     O processamento e o armazenamento locais podem ser vantajosos por ter uma velocidade alta e não depender de conexões externas. No entanto, essas vantagens podem acabar rapidamente ao passo que a quantidade a ser processada/armazenada começa a aumentar. Nesse sentido, uma das alternativas mais adotadas atualmente é a de computação em nuvem, onde um ambiente vasto com soluções prontas ou customizáveis são disponibilizadas e de forma escalável, de acordo com a demanda.
