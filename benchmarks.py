@@ -26,7 +26,7 @@ def pipeline_time(table_name: str="benchmarks"):
     
     # Compute the temporal execution ranges
     ranges = benchmarks \
-            .groupBy("scenario_id") \
+            .groupBy(["n_processes", "scenario_id"]) \
             .agg(
                     (F.max("computed_at").cast("long") - F.min("computed_at").cast("long")) \
                             .alias("execution_time")) 
@@ -47,9 +47,11 @@ def generate_lineplots(ranges: pyspark.sql.DataFrame):
     # Write the visualizatiosn 
     line_plot(data=execution_time, 
             x="n_processes", 
-            y="execution_time") 
+            y="execution_time", 
+            filename="benchmarks.png") 
 
 if __name__ == "__main__": 
     ranges = pipeline_time(table_name="benchmarks") 
+    generate_lineplots(ranges) 
     print(ranges) 
 

@@ -24,8 +24,6 @@ def parse_args():
     # Insert parameters for the command line 
     parser.add_argument("--query", help="Query to the database (with SQL format).", 
             type=str, required=True) 
-    parser.add_argument("--vis", help="Visualize the data from the table `benchmarks`.", 
-            action="store_strue")
     args = parser.parse_args() 
     
     # Return the parsed args 
@@ -58,8 +56,13 @@ def main():
     # Execute the query 
     cursor = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) 
     cursor.execute(query) 
-
-    values = cursor.fetchall() 
+    
+    try: 
+        values = cursor.fetchall() 
+    except psycopg2.ProgrammingError: 
+        # The query is actually a DDL command 
+        db_conn.commit() 
+        return 
     cursor.close() 
 
     # Instantiate a data frame with the data 
