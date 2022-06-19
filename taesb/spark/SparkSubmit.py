@@ -117,8 +117,8 @@ class ScheduleSpark(object):
 
         # Return the data frame 
         return dataframe 
-    
-    @benchmarks(messages="Fetch data from the database") 
+
+    @benchmarks(message="Fetch data from the database") 
     def read_tables(self, tablenames: List[str]): 
         """ 
         Capture the tables at `tablenames` and compute a dictionary for them. 
@@ -142,9 +142,8 @@ class ScheduleSpark(object):
         # Iterate across the names of the tables 
         for tablename in tablenames: 
             # Fetch the table from the database 
-            tables[tablename] = read_table(tablename, 
+            tables[tablename] = self.read_table(tablename, 
                     spark_conn=spark_conn) 
-
         # Return the tables 
         return tables 
 
@@ -241,7 +240,7 @@ ON CONFLICT (stat_id)
                            slw_scenario_id=data.slw_scenario_id,
                            slw_scenario_time=data.slw_scenario_time,
                            avg_ant_food=data.avg_ant_food,
-                           max_ant_food=max_ant_food 
+                           max_ant_food=data.max_ant_food 
                     ) 
 
         self.execute_query(query) 
@@ -443,64 +442,104 @@ ON CONFLICT (scenario_id)
         """ 
         Compute the quantities and generate the values, which . 
         """ 
-        # Generate a table to gather the results 
-        data = dict() 
+        # Identifier for these quantities; this is appropriate for joining 
+        # values from distinct columns, and it is moreover a surrogate for a 
+        # suitable dimensional model 
+        stat_id = 1 
 
-        # Compute the quantity of scenarios 
-        data["n_scenarios"] = tables[scenarios_tn].count() 
-        # and the quantity of anthills 
-        data["n_anthills"], data["foods_in_anthills"] = tables[anthills_tn] \
-                .agg(F.countDistinct("anthill_id"), F.sum("food_storage")) \
-                .collect()[0] 
+        # We implement a bottom-up algorithm, in which we start 
+        # with the most granular table and succeedingly increment 
+        # choose other tables 
+        data = tables[ants_tn] \
+                .agg(F.max("captured_food").alias("max_ant_food"), 
+                    F.mean("captured_food").alias("avg_ant_food"), 
+                    F.sum("searching_food").alias("n_ants_searching_food"), 
+                    F.count("ant_id").alias("n_ants") 
+                ) 
+        # Insert column with fixed value for subsequent joins 
+        data = data.withColumn("stat_id", F.lit(stat_id)) 
         
-        # and the quantity of foods in deposit 
-        data["foods_in_deposit"] = tables[foods_tn] \
-                .agg(F.sum("current_volume")) \
-                .collect()[0][0] 
-
-        # Quantity of ants alive and quantity searching food 
-        # and the quantities regarding their captures 
-        data["n_ants"], data["n_ants_searching_food"], data["avg_ant_food"], \
-                data["max_ant_food"] = tables[ants_tn] \
-                    .agg(F.countDistinct("ant_id"), F.sum("searching_food"), 
-                            F.mean("captured_food"), F.max("captured_food")) \
-                    .collect()[0] 
-
-        # Quantity of foods in transit 
-        data["foods_in_transit"] = data["n_ants"] - data["n_ants_searching_food"] 
-
-        # Quantity of foods in total 
-        data["foods_total"] = data["foods_in_deposit"] + data["foods_in_transit"] + \
-                data["foods_in_anthills"] 
+        # Compute the data regarding the foods 
+        foods_in_deposit = tables[foods_tn] \
+            .agg(F.sum("current_volume").alias("foods_in_deposit")) \
+            .withColumn("stat_id", F.lit(stat_id))  
         
-        # Capture inactive scenarios 
-        inactive_scenarios = tables[scenarios_tn] \
-                .filter(tables[scenarios_tn].active != 1) 
+        data = data.join( 
+                foods_in_deposit, 
+                on="stat_id",
+                how="inner" 
+        ) 
+        # Compute the data regarding the anthills 
+        anthills_data = tables[anthills_tn] \
+                .agg(F.count("anthill_id").alias("n_anthills"), 
+                    F.sum("food_storage").alias("foods_in_anthills")) \
+                .withColumn("stat_id", F.lit(stat_id)) 
+        
+        data = data.join( 
+                anthills_data, 
+                on="stat_id", 
+                how="inner" 
+        ) 
 
-        # Compute the average execution time within the inactive scenarios 
-        data["avg_execution_time"] = inactive_scenarios.agg(F.mean("execution_time")) \
-                .collect()[0][0] 
+        scenarios_data = tables[scenarios_tn] \
+                .agg(F.count("scenario_id").alias("n_scenarios"), 
+                    F.max("execution_time").alias("slw_scenario_time"), 
+                    F.min("execution_time").alias("fst_scenario_time"), 
+                    F.mean("execution_time").alias("avg_execution_time")) \
+                .withColumn("stat_id", F.lit(stat_id)) 
 
-        # Execution time in the scenarios 
-        ord_scenarios = inactive_scenarios \
-                .orderBy(F.desc("execution_time")) 
+        # Join the data 
+        data = data.join( 
+                scenarios_data, 
+                on="stat_id", 
+                how="inner" 
+        ) 
+        
+        # Compute the total quantity of foods; a pretty ad hoc procedure 
+        data = data \
+                .withColumn("foods_in_transit", F.col("n_ants") - F.col("n_ants_searching_food")) 
 
-        fst_scenario = ord_scenarios \
-                .take(1)[0] \
-                .asDict() 
-        slw_scenario = ord_scenarios \
-                .tail(1)[0] \
-                .asDict() 
+        data = data \
+                .withColumn("foods_total", F.col("foods_in_anthills") + \
+                        F.col("foods_in_transit") + \
+                        F.col("foods_in_deposit") 
+                ) 
+        
+        # Compute the boundary scenarios 
+        fst_scenario = tables[scenarios_tn].join( 
+                data, 
+                data.fst_scenario_time == tables[scenarios_tn].execution_time, 
+                "left_anti"
+        ).selectExpr("scenario_id AS fst_scenario_id") \
+                .limit(1) \
+                .withColumn("stat_id", F.lit(stat_id)) 
 
-        # Identify the ID and the execution time for these scenarios 
-        data["fst_scenario_id"] = fst_scenario["scenario_id"] 
-        data["fst_scenario_time"] = fst_scenario["execution_time"] 
-        data["slw_scenario_id"] = slw_scenario["scenario_id"] 
-        data["slw_scenario_time"] = slw_scenario["execution_time"] 
+        slw_scenario = tables[scenarios_tn].join( 
+                data, 
+                data.slw_scenario_time == tables[scenarios_tn].execution_time, 
+                "left_anti" 
+        ).selectExpr("scenario_id AS slw_scenario_id") \
+                .limit(1) \
+                .withColumn("stat_id", F.lit(stat_id)) 
 
+        # Join the data 
+        data = data.join( 
+                fst_scenario, 
+                on="stat_id", 
+                how="inner" 
+        ) 
+
+        data = data.join( 
+                slw_scenario, 
+                on="stat_id", 
+                how="inner" 
+        ) 
+        
+        # Convert data to dict 
+        data = data.toPandas().to_dict() 
         # Return the data 
         return SimpleNamespace(**data)  
-    
+
     @benchmarks(message="Compute the local quantities") 
     def compute_local_stats(self, 
             tables: pyspark.sql.DataFrame, 
