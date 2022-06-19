@@ -71,6 +71,8 @@ class ScheduleSpark(object):
         self.database_user = database_user 
         self.database_pwd = database_pwd 
         # and start a Spark session 
+        # NOTE: Use the current spark.master option (local[*]) for 
+        # local development! 
         self.spark_session = SparkSession \
                 .builder \
                 .config("spark.jars", os.environ["SPARK_JARS"]) \
