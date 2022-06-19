@@ -1,0 +1,142 @@
+\documentclass[12pt,oneside,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+
+\usepackage{settings/preambule}
+
+\input{settings/listings}
+\input{settings/listings_scilab}
+\usepackage{hhline}
+
+\newcommand{\fontcode}[2]{{\fontfamily{#1}\selectfont #2}}
+
+%\title{Relatório - AP1_ALNum}
+\title{Relatório\\Computação Escalável}
+\student{Tiago da Silva \\João Alcindo Ribeiro de Azevedo\\Germano Andrade Brandão}
+\local{Rio de Janeiro}
+
+\coversheet{}%write 'yes' or left it blank
+
+\professor{.}
+\summary{.}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+
+\section{Introdução}
+    Trataremos aqui das decisões de projetos adotadas ao longo do trabalho, procurando esclarecer o nosso ponto de vista acerca de cada escolha. Além disso, toda a estrutura será detalhada, de forma a ser possível entender bem como funciona todo o processo de simulação de ponta a ponta. Por fim, mostraremos como o trabalho foi adaptado para que fosse processado em nuvem, utilizando majoritariamente os serviços da Amazon AWS.
+
+\section{Pipeline}
+
+	\begin{figure} 
+		\centering 
+		\includegraphics[width=\textwidth]{../images/relational_diagram.png} 
+		\caption{Modelo relacional do banco de dados utilizado para a captura persistente dos dados gerados pela simulação.} 
+		\label{fig:relational} 
+	\end{figure} 
+
+	Escolhemos uma pipeline de extração, transformação e carregamento (ETL, em oposição a ELT); importantemente, esta escolha está amarrada à contemplação de que os procedimentos para serializar os dados e os tornar receptivos a um banco de dados relacional gozam de intensidade computacinoal enxuta. Utilizamos, para isso, um banco de dados alicerçado no modelo relacional da Figura~\ref{fig:relational}. Nas seções seguintes, desta maneira, descrevemos a implementação de cada estágio de nosso pipeline ETL. 
+	
+	Neste ínterim, advogamos o modelo escolhido e apresentamos o framework geral para controlar a comunicação entre os processos responsáveis pelo inserção dos dados em um banco de dados. Inicialmente, as tabelas \texttt{scenarios}, \texttt{ants}, \texttt{anthills} e \texttt{foods} almejam incorporar as informações brutas geradas pelas simulações; isso enseja a expansão da amplitude de análises subsequentes. As tabelas com prefixo \texttt{stats\_}, por outro lado, são atualizadas periodicamente e permitem, desta maneira, o acesso, em diferentes aspectos de granularidades\footnote{Explicitamente, escrevemos \texttt{global} para as análises globais, que tangenciam todos os cenários executados; \texttt{local}, para as análises que consolidam os aspectos de cada cenário; e \texttt{atomic}, para as análises que conformam as instâncias que apontam para os formigueiros.}, às informações por usuários (na Seção~\ref{sec:user}, exploramos o desenho de uma interface que direciona o usuário ao exame dos cenários correntes e passados). Alternativamente, poderíamos 
+
+	\begin{enumerate} 
+		\item implementar uma base de dados analítica, com um modelo dimensional que combinasse parciomoniosamente as tabelas para o cômputo das quantidades solicitadas nos requisitos da modelagem;
+		\item e, mais disruptivamente, optar pela utilização de um banco de dados noSQL, com um pipeline ELT, em que os dados seriam armazenados e, em seguida, processados. 
+	\end{enumerate} 
+
+	\noindent Nestas condições, nossas escolhas estão amarradas a compleições objetivas: com respeito a 1, precisaríamos comportar, em nosso sistema, um mecanismo de transferência de informações entre um banco de dados operacional e um analítico, trascendendo, em nossa opinião, o objetivo desta avaliação, que não inclui a modelagem dimensional; com respeito a 2, nossas breves exposições a bancos de dados noSQL (como o MongoDB) culminaram em nossas reticências em os introduzir neste sistema. Neste cenário, nossas escolhas por um banco de dados relacional estão alicerçadas em sua conveniência e na existência de múltiplas ferramentas que permitem a sua integração em um sistema distribuído. 
+
+\subsection{Extração}
+\subsection{Transformação}
+\subsection{Carregamento}
+
+\section{Armazenamento em nuvem (AWS)}
+    O processamento e o armazenamento locais podem ser vantajosos por ter uma velocidade alta e não depender de conexões externas. No entanto, essas vantagens podem acabar rapidamente ao passo que a quantidade a ser processada/armazenada começa a aumentar. Nesse sentido, uma das alternativas mais adotadas atualmente é a de computação em nuvem, onde um ambiente vasto com soluções prontas ou customizáveis são disponibilizadas e de forma escalável, de acordo com a demanda.
+    
+    Dito isso, para esse trabalho utilizamos alguns dos serviços de nuvem da Amazon Web Services, a fim de agregar mais robustez ao nosso pipeline de dados. Assim, veremos agora quais recursos foram utilizados e informações das instâncias criadas em cada um deles.
+
+\subsection{AmazonMQ}
+    Uma vez que utilizamos o RabbitMQ como broker, temos o AmazonMQ como serviço de gerenciamento de mensagens na AWS para criar uma instância com o RabbitMQ.
+    
+    Ao instanciar com as opções devidamente escolhidas, ficamos com as seguintes informações
+    \begin{table}[!ht]
+        \centering
+        \begin{tabular}{|c|c|c|}\hline
+            Broker engine & Engine version & Instance type\\
+            \hline
+            \fontcode{lmtt}{RabbitMQ} & \fontcode{lmtt}{3.9.16} & \fontcode{lmtt}{mq.t3.micro}\\
+            \hline
+        \end{tabular}
+        \caption{Informações da instância na AmazonMQ}
+        \label{tab:amazonmq}
+    \end{table}
+    
+    A partir disso, podemos nos conectar com o broker a partir dos dados a seguir.
+    \begin{table}[!ht]
+        \centering
+        \begin{tabular}{|c|c|c|}\hline
+            ARN (Amazon Resource Name) &  RabbitMQ web console & port\\\hline
+            \begin{minipage}{.5\textwidth}\vspace{1mm}\fontcode{lmtt}{arn:aws:mq:us-east-1:676432491375\\:broker:TJG:b-7182fca9-4c07-4bfa-b\\e01-72310cb18d60}\vspace{1mm}\end{minipage} & \href{https://b-7182fca9-4c07-4bfa-be01-72310cb18d60.mq.us-east-1.amazonaws.com}{\begin{minipage}{.55\textwidth}\fontcode{lmtt}{https://b-7182fca9-4c07-4bfa-be01-723\\10cb18d60.mq.us-east-1.amazonaws.com}
+            \end{minipage}} & \fontcode{lmtt}{5671}\\\hline
+        \end{tabular}
+        \caption{Informações para conexão}
+        \label{tab:amazonMQconn}
+    \end{table}
+    
+    Para acessar o console, basta utilizar as credenciais a seguir.
+    \begin{table}[!ht]
+        \centering
+        \begin{tabular}{|c|c|}\hline
+            Username & Password \\\hline
+            \fontcode{lmtt}{username} & \fontcode{lmtt}{passwordpassword} \\\hline
+        \end{tabular}
+        \caption{Credenciais RabbitMQ}
+        \label{tab:rabbitMQcredentials}
+    \end{table}
+   
+    
+    
+
+\subsection{RDS}
+    
+    
+\subsection{ECR}
+    Para hospedar imagens Docker, utilizamos o Amazon ECR (\textit{Elastic Container Registry}) que é um registro de contêiner totalmente gerenciado da Amazon AWS.
+    
+    Nesse sentido, criamos dois repositórios, um para o \textit{celery} e outro para o \textit{spark}.
+    
+    \begin{table}[!ht]
+        \centering
+        \begin{tabular}{|c|c|}\hline
+            Repository name &  URI\\\hhline{|=|=|}
+            \fontcode{lmtt}{tjg-celery} &  \fontcode{lmtt}{676432491375.dkr.ecr.us-east-1.amazonaws.com/tjg-celery}\\\hline
+            \fontcode{lmtt}{tjg-spark} & \fontcode{lmtt}{676432491375.dkr.ecr.us-east-1.amazonaws.com/tjg-spark}\\\hline
+        \end{tabular}
+        \caption{Informações das imagens}
+        \label{tab:amazonECR}
+    \end{table}
+\subsection{ECS}
+    Para gerenciar os containers, utilizamos o Amazon ECS (\textit{Elastic Container Service}), onde podemos executar tarefas dentro do cluster.
+    
+    \begin{table}[!ht]
+        \centering
+        \begin{tabular}{|c|c|c|}\hline
+            Cluster & Cluster ARN & Launch type\\\hline
+            \fontcode{lmtt}{TJG} & \fontcode{lmtt}{arn:aws:ecs:us-east-1:676432491375:cluster/TJG} & \fontcode{lmtt}{FARGATE}\footnotemark \\\hline
+        \end{tabular}
+        \caption{Informações do cluster}
+        \label{tab:ino_amazonECS}
+    \end{table}
+    \footnotetext{O \href{https://docs.aws.amazon.com/pt_br/AmazonECS/latest/developerguide/AWS_Fargate.html}{AWS Fargate} é uma tecnologia que pode ser usada com o Amazon ECS para executar contêineres sem a necessidade de gerenciar servidores ou clusters de instâncias do Amazon EC2.}
+    
+    Com isso, ficamos aptos a definir as \textit{tasks}
+     
+\section{Interface com o usuário} \label{sec:user} 
+
+\end{document}
+
