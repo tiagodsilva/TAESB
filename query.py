@@ -24,7 +24,8 @@ def parse_args():
     # Insert parameters for the command line 
     parser.add_argument("--query", help="Query to the database (with SQL format).", 
             type=str, required=True) 
-
+    parser.add_argument("--vis", help="Visualize the data from the table `benchmarks`.", 
+            action="store_strue")
     args = parser.parse_args() 
     
     # Return the parsed args 
