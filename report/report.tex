@@ -51,6 +51,8 @@
 
 	\noindent Nestas condições, nossas escolhas estão amarradas a compleições objetivas: com respeito a 1, precisaríamos comportar, em nosso sistema, um mecanismo de transferência de informações entre um banco de dados operacional e um analítico, trascendendo, em nossa opinião, o objetivo desta avaliação, que não inclui a modelagem dimensional; com respeito a 2, nossas breves exposições a bancos de dados noSQL (como o MongoDB) culminaram em nossas reticências em os introduzir neste sistema. Neste cenário, nossas escolhas por um banco de dados relacional estão alicerçadas em sua conveniência e na existência de múltiplas ferramentas que permitem a sua integração em um sistema distribuído. 
 
+	Adicionalmente, a distribuição da pipeline ETL em múltiplos nós de computação implicou a escolha de um mecanismo de comunicação; em nossa opinião, este mecanimos deveria (1) ser escalável (isto é, as mensagens têm de ser persistentes e as chamadas, assíncronas; assim, garantimos que os clientes podem interagir com a interface e que seus dados serão inseridos na base de dados), (2) ser transparente (equivalentemente, a sua incorporação ao sistema existente deveria exigir modificações enxutas no código-fonte) e (3), mais importante, compatível com um cenário em que a estrutura subjacente das mensagens (como o tipo de dado e o tamanho) é difusa e variável.   
+
 \subsection{Extração}
 \subsection{Transformação}
 \subsection{Carregamento}
