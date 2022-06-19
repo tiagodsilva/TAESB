@@ -17,10 +17,11 @@ import sched
 import json 
 
 # Docs 
-from typing import Dict, Any, List, Callable
+from typing import Dict, Any, List, Callable 
+from types import SimpleNamespace 
 
 # Benchmarks 
-from datetime import datetime 
+import time 
 
 def benchmarks(message: str=None): 
     """ 
@@ -32,15 +33,15 @@ def benchmarks(message: str=None):
         """ 
         # Compute the benchmarks for the decorated function 
         def decorated(self, *args, **kwargs): 
-            start = datetime.now() 
-            func(*args, **kwargs) 
-            current = datetime.now() 
+            start = time.time()  
+            data = func(self, *args, **kwargs) 
+            current = time.time()  
             # Print a message with the benchmarks 
             print("[INFO]: {message}, {interval}s".format( 
                 message=message, 
-                interval= (current.microsecond - start.microsecond) / 10**6 
+                interval= (current - start)
             )) 
-        
+            return data 
         # Return the decorated function 
         return decorated 
 
@@ -105,48 +106,74 @@ class ScheduleSpark(object):
         cur.execute(query) 
         cur.close() 
         self.db_conn.commit() 
-
-    def read_table(self, tablename: str): 
+    
+    def read_table(self, tablename: str, 
+            spark_conn: SparkSession): 
         """ 
         Capture a table from the database at `database_url`. 
         """ 
-        dataframe = self.spark_session.read \
+        dataframe = spark_conn.option("dbtable", tablename) \
+                .load() 
+
+        # Return the data frame 
+        return dataframe 
+    
+    @benchmarks(messages="Fetch data from the database") 
+    def read_tables(self, tablenames: List[str]): 
+        """ 
+        Capture the tables at `tablenames` and compute a dictionary for them. 
+        """ 
+        # A dictionary to combine the tables 
+        tables = dict() 
+
+        # Use Spark API to identify the database 
+        spark_conn = self.spark_session \
+                .read \
                 .format("jdbc") \
                 .option("url", "{driver}://{host}/{database}".format( 
                     driver="jdbc:postgresql", 
                     host=self.database_host, 
                     database=self.database_name) 
                 ) \
-                .option("dbtable", tablename) \
                 .option("user", self.database_user) \
                 .option("password", self.database_pwd) \
-                .option("driver", "org.postgresql.Driver") \
-                .load() 
+                .option("driver", "org.postgresql.Driver") 
 
-        # Return the data frame 
-        return dataframe 
-    
+        # Iterate across the names of the tables 
+        for tablename in tablenames: 
+            # Fetch the table from the database 
+            tables[tablename] = read_table(tablename, 
+                    spark_conn=spark_conn) 
+
+        # Return the tables 
+        return tables 
+
     @benchmarks(message="Insert global quantities in the database") 
     def _update_global(self, 
-            n_scenarios: int, 
-            n_anthills: int, 
-            n_ants_searching_food: int, 
-            n_ants: int, 
-            foods_in_anthills: int, 
-            foods_in_deposit: int, 
-            foods_in_transit: int, 
-            foods_total: int, 
-            avg_execution_time: int, 
-            fst_scenario_id: str, 
-            fst_scenario_time: int, 
-            slw_scenario_id: str, 
-            slw_scenario_time: int, 
-            avg_ant_food: float, 
-            max_ant_food: int 
-        ): 
+            data: SimpleNamespace): 
         """ 
         Update the stats table in the database pointed by `db_conn`; 
         this is done periodically. 
+
+        Parameters: 
+        ---------- 
+        data: SimpleNamespace 
+            The data that will be inserted in the database; the attributes are 
+                n_scenarios 
+                n_anthills 
+                n_ants_searching_food 
+                n_ants 
+                foods_in_anthills 
+                foods_in_deposit 
+                foods_in_transit 
+                foods_total 
+                avg_execution_time 
+                fst_scenario_id 
+                fst_scenario_time 
+                slw_scenario_id 
+                slw_scenario_time 
+                avg_ant_food 
+                max_ant_food 
         """ 
         # Write the query 
         query = """INSERT INTO stats_global
@@ -200,20 +227,20 @@ ON CONFLICT (stat_id)
                    slw_scenario_time = {slw_scenario_time}, 
                    avg_ant_food = {avg_ant_food}, 
                    max_ant_food = {max_ant_food};""".format( 
-                           n_scenarios=n_scenarios,
-                           n_anthills=n_anthills,
-                           n_ants_searching_food=n_ants_searching_food,
-                           n_ants=n_ants,
-                           foods_in_anthills=foods_in_anthills,
-                           foods_in_deposit=foods_in_deposit, 
-                           foods_in_transit=foods_in_transit, 
-                           foods_total=foods_total, 
-                           avg_execution_time=avg_execution_time,
-                           fst_scenario_id=fst_scenario_id,
-                           fst_scenario_time=fst_scenario_time, 
-                           slw_scenario_id=slw_scenario_id,
-                           slw_scenario_time=slw_scenario_time,
-                           avg_ant_food=avg_ant_food,
+                           n_scenarios=data.n_scenarios,
+                           n_anthills=data.n_anthills,
+                           n_ants_searching_food=data.n_ants_searching_food,
+                           n_ants=data.n_ants,
+                           foods_in_anthills=data.foods_in_anthills,
+                           foods_in_deposit=data.foods_in_deposit, 
+                           foods_in_transit=data.foods_in_transit, 
+                           foods_total=data.foods_total, 
+                           avg_execution_time=data.avg_execution_time,
+                           fst_scenario_id=data.fst_scenario_id,
+                           fst_scenario_time=data.fst_scenario_time, 
+                           slw_scenario_id=data.slw_scenario_id,
+                           slw_scenario_time=data.slw_scenario_time,
+                           avg_ant_food=data.avg_ant_food,
                            max_ant_food=max_ant_food 
                     ) 
 
@@ -221,15 +248,21 @@ ON CONFLICT (stat_id)
     
     @benchmarks(message="Insert the local quantities in the database") 
     def _update_local(self, 
-            scenario_id_l: List[str], 
-            n_anthills_l: List[int], 
-            n_foods_l: List[int], 
-            n_ants_l: List[int], 
-            execution_time_l: List[int], 
-            active_l: List[int], 
-        ): 
+            data: SimpleNamespace): 
         """ 
         Update the table that displays local statistics. 
+        
+        Parameters 
+        ----------
+        data: SimpleNamespace 
+            The attributes that will be modified in the database; specifically, 
+            each value in this namespace is a list of N quantities, in which N equals 
+            the quantity of instances inserted in the database. Hence, the values are 
+                scenario_id_l: List[str] 
+                n_anthills_l: List[int] 
+                n_foods_l: List[int] 
+                execution_time_l: List[int] 
+                active_l: List[int] 
         """ 
         query = """INSERT INTO stats_local
         (scenario_id, 
@@ -243,7 +276,12 @@ ON CONFLICT (stat_id)
         # Consolidate the queries in a list 
         queries = list() 
         for (scenario_id, n_anthills, n_ants, n_foods, execution_time, active) in \
-                zip(scenario_id_l, n_anthills_l, n_ants_l, n_foods_l, execution_time_l, active_l): 
+                zip(data.scenario_id_l, 
+                    data.n_anthills_l, 
+                    data.n_ants_l, 
+                    data.n_foods_l, 
+                    data.execution_time_l, 
+                    data.active_l): 
             # Insert the instance in the data base; if the scenario already 
             # exists, update it 
             scenario_query = query + """
@@ -276,15 +314,22 @@ ON CONFLICT (scenario_id)
     
     @benchmarks("Insert the atomic quantities in the database") 
     def _update_atomic(self, 
-            scenario_id_l: List[str], 
-            anthill_id_l: List[str], 
-            n_ants_l: List[int], 
-            n_ants_searching_food_l: List[int], 
-            foods_in_anthills_l: List[int], 
-            foods_in_transit_l: List[int], 
-            probability_l: List[float]): 
+            data: SimpleNamespace): 
         """ 
         Update the data with atomic values, for each anthill. 
+
+        Parameters 
+        --------- 
+        data: SimpleNamespace 
+            The attributes that will be modified in the database, in an format 
+            equivalent to that in `_update_local`; the values of this namespace contemplate 
+                scenario_id_l: List[str] 
+                anthill_id_l: List[str] 
+                n_ants_l: List[int] 
+                n_ants_searching_food_l: List[int] 
+                foods_in_anthills_l: List[int] 
+                foods_in_transit_l: List[int] 
+                probability_l: List[float] 
         """ 
         query = """INSERT INTO stats_atomic 
         (scenario_id, 
@@ -301,8 +346,13 @@ ON CONFLICT (scenario_id)
         # Insert a query for each instance 
         for scenario_id, anthill_id, n_ants, n_ants_searching_food, \
                 foods_in_anthills, foods_in_transit, probability in \
-                zip(scenario_id_l, anthill_id_l, n_ants_l, n_ants_searching_food_l, 
-                    foods_in_anthills_l, foods_in_transit_l, probability_l): 
+                zip(data.scenario_id_l, 
+                    data.anthill_id_l, 
+                    data.n_ants_l, 
+                    data.n_ants_searching_food_l, 
+                    data.foods_in_anthills_l, 
+                    data.foods_in_transit_l, 
+                    data.probability_l): 
 
             # Write the query
             anthill_query = query + """
@@ -350,13 +400,7 @@ ON CONFLICT (scenario_id)
         tables_names = [ants_tn, anthills_tn, foods_tn, scenarios_tn]
         
         # And instantiate a container for the data frames
-        tables = {
-            dbtable:None for dbtable in tables_names
-        }
-
-        # Iterate across the tables
-        for table in tables:
-            tables[table] = self.read_table(table)
+        tables = self.read_tables(tables_names) 
 
         # print(tables)
         # Compute the desired quantities 
@@ -385,9 +429,9 @@ ON CONFLICT (scenario_id)
             # sum `NoneType` with an integer 
             return 
 
-        self._update_global(**global_stats) 
-        self._update_local(**local_stats) 
-        self._update_atomic(**atomic_stats) 
+        self._update_global(global_stats) 
+        self._update_local(local_stats) 
+        self._update_atomic(atomic_stats) 
 
     @benchmarks(message="Compute the global quantities") 
     def compute_global_stats(self, 
@@ -455,7 +499,7 @@ ON CONFLICT (scenario_id)
         data["slw_scenario_time"] = slw_scenario["execution_time"] 
 
         # Return the data 
-        return data 
+        return SimpleNamespace(**data)  
     
     @benchmarks(message="Compute the local quantities") 
     def compute_local_stats(self, 
@@ -573,9 +617,9 @@ ON CONFLICT (scenario_id)
         data = {key+"_l":data[key] for key in data} 
 
         # Return the aggregated data 
-        return data 
+        return SimpleNamespace(**data) 
     
-    @benchmarks(message="Compute the local quantities") 
+    @benchmarks(message="Compute atomic quantities") 
     def compute_atomic_stats(self, 
             tables: Dict[str, pyspark.sql.DataFrame], 
             ants_tn: str,
@@ -679,7 +723,7 @@ ON CONFLICT (scenario_id)
         del datatb  
 
         # Return the current data 
-        return data 
+        return SimpleNamespace(**data) 
     
     def schedule(self, # Local execution  
             stamp: str, 
@@ -701,6 +745,7 @@ ON CONFLICT (scenario_id)
                 )
                 scheduler.run() 
             except Exception as err: 
+                # Does not interrupt the pipeline on exceptions 
                 print("[ERROR]: {err}, skipping current iteration".format(err=str(err))) 
                 continue 
             
