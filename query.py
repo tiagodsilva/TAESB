@@ -55,7 +55,7 @@ def main():
     query = args.query 
 
     # Execute the query 
-    cursor = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor) 
+    cursor = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) 
     cursor.execute(query) 
 
     values = cursor.fetchall() 

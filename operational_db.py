@@ -122,6 +122,7 @@ DB_CREATE_BENCHMARKS = """CREATE TABLE IF NOT EXISTS benchmarks (
     id SERIAL PRIMARY KEY, 
     scenario_id VARCHAR(256), 
     computed_at TIMESTAMPTZ DEFAULT Now(), 
+    n_processes INT, 
     CONSTRAINT fk_scenario_id 
         FOREIGN KEY(scenario_id) 
             REFERENCES scenarios(scenario_id) 
