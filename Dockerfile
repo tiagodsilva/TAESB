@@ -27,4 +27,4 @@ ENV POSTGRESQL_PASSWORD=passwordpassword
 ENV POSTGRESQL_DATABASE=operational_tjg
 ENV BROKER_URL=amqps://username:passwordpassword@b-7182fca9-4c07-4bfa-be01-72310cb18d60.mq.us-east-1.amazonaws.com:5671
 
-CMD ["celery", "-A", "taesb", "worker", "-l", "INFO", "--concurrency", "1"]
+CMD ["celery", "-A", "taesb", "worker", "-l", "INFO", "--concurrency", "7"]

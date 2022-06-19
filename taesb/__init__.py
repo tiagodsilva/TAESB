@@ -17,5 +17,5 @@ os.environ["POSTGRESQL_USER"] = "postgres"
 os.environ["POSTGRESQL_PASSWORD"] = "passwordpassword"
 os.environ["POSTGRESQL_DATABASE"] = "operational_tjg" 
 # "localhost" 
-os.environ["BROKER_URL"] = "amqps://username:passwordpassword@b-7182fca9-4c07-4bfa-be01-72310cb18d60.mq.us-east-1.amazonaws.com:5671" 
+os.environ["BROKER_URL"] = "amqp://"# username:passwordpassword@b-7182fca9-4c07-4bfa-be01-72310cb18d60.mq.us-east-1.amazonaws.com:5671" 
 
