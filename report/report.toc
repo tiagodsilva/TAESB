@@ -9,5 +9,5 @@
 \contentsline {subsection}{\numberline {4.1}AmazonMQ}{8}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}RDS}{8}{subsection.4.2}%
 \contentsline {subsection}{\numberline {4.3}ECR}{8}{subsection.4.3}%
-\contentsline {subsection}{\numberline {4.4}ECS}{8}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.4}ECS}{9}{subsection.4.4}%
 \contentsline {section}{\numberline {5}Interface com o usuário}{9}{section.5}%
