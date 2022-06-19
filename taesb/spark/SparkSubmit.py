@@ -536,7 +536,8 @@ ON CONFLICT (scenario_id)
         ) 
         
         # Convert data to dict 
-        data = data.toPandas().to_dict() 
+        data = data.toPandas().to_dict("list")  
+        data = {key:data[key][0] for key in data} 
         # Return the data 
         return SimpleNamespace(**data)  
 
