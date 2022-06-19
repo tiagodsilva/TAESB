@@ -52,6 +52,7 @@ ENV POSTGRESQL_DATABASE=operational_tjg
 ENV BROKER_URL=amqps://username:passwordpassword@b-7182fca9-4c07-4bfa-be01-72310cb18d60.mq.us-east-1.amazonaws.com:5671
 ENV SPARK_JARS=${POSTGRESQL}.jar
 ENV SPARK_UI_ENABLED=false 
+ENV SPARK_MASTER=local[*]
 # Execute the processing 
 
 CMD ["spark-submit", \

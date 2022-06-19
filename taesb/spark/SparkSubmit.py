@@ -74,6 +74,7 @@ class ScheduleSpark(object):
         self.spark_session = SparkSession \
                 .builder \
                 .config("spark.jars", os.environ["SPARK_JARS"]) \
+                .config("spark.master", os.environ["SPARK_MASTER"]) \
                 .config("spark.ui.enabled", os.environ["SPARK_UI_ENABLED"]) \
                 .getOrCreate() 
         
@@ -796,10 +797,6 @@ ON CONFLICT (scenario_id)
 if __name__ == "__main__": 
     # Capture Spark's configurations 
     # Instantiate a session for Spark 
-    spark = ScheduleSpark("taesb", 
-            database_name=os.environ["POSTGRESQL_DATABASE"], 
-            database_host=os.environ["POSTGRESQL_HOST"], 
-            database_user=os.environ["POSTGRESQL_USER"], 
-            database_pwd=os.environ["POSTGRESQL_PASSWORD"]) 
+    spark = ScheduleSpark("taesb") 
     spark.schedule(stamp=5) 
 
