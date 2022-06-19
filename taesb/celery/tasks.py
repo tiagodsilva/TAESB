@@ -100,7 +100,14 @@ def benchmark(self, global_map: Dict):
     """ 
     Compute the execution time for this pipeline. 
     """ 
-    self.update_benchmarks(global_map["scenario_id"]) 
+    if not hasattr(app, "initial_stats"): 
+        # Compute initial stats for the Celery application 
+        app.initial_stats = app.control.inspect().stats() 
+        app.n_processes = sum(
+                [len(app.initial_stats[worker]["pool"]["processes"]) for \
+                        worker in app.initial_stats]
+        ) 
+    self.update_benchmarks(global_map["scenario_id"], app.n_processes) 
 
 @worker_process_shutdown.connect 
 def shutdown_worker(**kwargs): 

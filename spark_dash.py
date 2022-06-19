@@ -8,6 +8,7 @@ import taesb
 
 import os
 import plotly.graph_objs as go
+import plotly.express as px 
 
 import psycopg2 
 import psycopg2.extras 
@@ -256,6 +257,11 @@ WHERE scenario_id = '{scenario_id}';""".format(scenario_id=value)
             "probability": "Winning chances" 
     } 
     
+    # Write a barplot 
+    fig = px.bar(anthills, 
+            x="anthill_id", 
+            y="foods_in_anthills") 
+
     return [ 
         html.Pre("Data for this scenario."), 
         dash_table.DataTable( 
@@ -269,6 +275,9 @@ WHERE scenario_id = '{scenario_id}';""".format(scenario_id=value)
         dash_table.DataTable( 
             anthills.to_dict("records"), 
             columns=[{"name": display_anthills[i], "id": i} for i in anthills.keys()] 
+        ), 
+        dcc.Graph( 
+            figure=fig 
         ) 
     ] 
 

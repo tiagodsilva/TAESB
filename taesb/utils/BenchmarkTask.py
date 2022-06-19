@@ -39,18 +39,22 @@ class BenchmarkTask(Task):
             self.init_db() 
         return self._db_conn 
     
-    def update_benchmarks(self, scenario_id: str): 
+    def update_benchmarks(self, scenario_id: str, n_processes: int): 
         """ 
         Update the pipeline's benchmarking. 
         """ 
         # Generate the current query 
-        query = """INSERT INTO benchmarks 
+        query = """SET TIMEZONE='America/Los_angeles'; 
+INSERT INTO benchmarks 
         (scenario_id, 
-        current) 
+        computed_at, 
+        n_processes) 
     VALUES 
         ('{scenario_id}', 
-        now());""".format(scenario_id=scenario_id) 
-        
+        now(), 
+        {n_processes});""".format(scenario_id=scenario_id, 
+                n_processes=n_processes) 
+    
         # Instantiate a cursor 
         cursor = self.db_conn.cursor() 
         cursor.execute(query) 
