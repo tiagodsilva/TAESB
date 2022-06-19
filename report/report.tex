@@ -165,6 +165,25 @@ No entanto, em oposição a uma pipeline ETL, escolhemos não introduzir o \text
      
 \section{Interface com o usuário} \label{sec:user} 
 
+Além disso, desenhamos um par de interfaces para o usuário interagir com o nosso sistema: em uma delas, uma aplicação web, propiciamos visualizações de cada cenário e de quantidades sumárias, globais (de todos os clientes) e locais (de cada cliente, corrent ou passado); em outra, ensejamos que a consulta à base de dados por comandos da linguagem SQL. A aplicação gráfica está disponível na Figura [figura], e é descrita doravante. Em um console, contudo, os procedimentos são mais elementares; por exemplo, se quisermos consultar a quantidade de formigas contempladas por todos os cenários, executamos
+
+\begin{lstlisting} 
+	python query.py --query 'SELECT COUNT(*) FROM ants;'
+\end{lstlisting} 
+
+\noindent e, se almejarmos identificar a lista de cenários executados, e seus tempos de execução (medidos em quantidades de iterações), utilizamos 
+
+\begin{lstlisting} 
+	python query.py --query 'SELECT * FROM scenarios;'    
+\end{lstlisting} 
+
+A interação gráfica, contudo, é mais direcionada aos objetivos elicitados a priori da modelagem do sistema. Na Figura [figura], factualmente, expomos as quantidades globais, que consolidam todos os cenários, em uma tabela; também pertimos, alternativamente, a escolha de um cenário e o acompanhamento de suas informações específicas e de seus formigueiros (inserimos, para isso, um gráfico de barras para enfatizar a discrepância entre os depósitos de comidas). Com o objetivo de a iniciar, execute, no diretório raiz da aplicação, 
+
+\begin{lstlisting} 
+	python spark_dash.py    
+\end{lstlisting} 
+
+\noindent e direcione seu navegador no sítio impresso na tela. Com ênfase, perecba que existe um par de dissonâncias entre os cenários atuais e as tabelas: por um lado, o processamento independente pelo \texttt{Spark} suscita uma discrepância temporal entre as informações na base de dados e as informações factuais; por outro, a interface gráfica também goza de uma taxa de atualização que expande a distinção entre a realidade e os registros.  
 
 \end{document}
 
