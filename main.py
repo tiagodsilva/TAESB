@@ -8,6 +8,9 @@ import taesb.default_params as config
 
 import argparse 
 
+import numpy as np 
+np.random.seed(42) 
+
 def anthills(s: str): 
     """ 
     Consolidate the data in anthills, which has the format 
