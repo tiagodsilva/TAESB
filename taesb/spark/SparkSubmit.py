@@ -19,6 +19,9 @@ import json
 # Docs 
 from typing import Dict, Any, List
 
+# Benchmarks 
+from datetime import datetime 
+
 # Start Spark session 
 class ScheduleSpark(object):
     """ 
@@ -304,6 +307,21 @@ ON CONFLICT (scenario_id)
         # Execute the DML queries 
         self.execute_query("\n".join(queries)) 
 
+    def benchmarks(self, 
+            start: datetime, 
+            current: datetime, 
+            quantities: str=None): 
+        """ 
+        Compute the benchmarks for the quantities `quantities`, and display a message. 
+        """ 
+        timedelta = (current.microsecond - start.microsecond) / 10**6 
+
+        print("Computation for {quantities} executed in {interval}s".format( 
+            quantities=quantities, 
+            interval=timedelta)) 
+
+    def benchmark(self, 
+            start: datet
     def update_stats(self):
         """
         Update the appropriate data in the analytical database.
@@ -329,21 +347,27 @@ ON CONFLICT (scenario_id)
         # print(tables)
         # Compute the desired quantities 
         try: 
+            start = datetime.now() 
             global_stats = self.compute_global_stats(tables,
                     ants_tn=ants_tn,
                     anthills_tn=anthills_tn, 
                     foods_tn=foods_tn, 
                     scenarios_tn=scenarios_tn) 
+            self.benchmarks(start, datetime.now(), quantity="global quantities") 
+            start = datetime.now() 
             local_stats = self.compute_local_stats(tables, 
                     ants_tn=ants_tn, 
                     anthills_tn=anthills_tn, 
                     foods_tn=foods_tn, 
                     scenarios_tn=scenarios_tn) 
+            self.benchmarks(start, datetime.now(), quantity="local quantities") 
+            start = datetime.now() 
             atomic_stats = self.compute_atomic_stats(tables, 
                     ants_tn=ants_tn, 
                     anthills_tn=anthills_tn, 
                     foods_tn=foods_tn, 
                     scenarios_tn=scenarios_tn) 
+            self.benchmarks(start, datetime.now(), quantity="atomic quantities") 
         except IndexError as err: 
             print("[ERROR]: {err}".format(err=err))
             # There are no instances in the table 

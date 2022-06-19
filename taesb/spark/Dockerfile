@@ -3,6 +3,10 @@ FROM ubuntu:20.04
 ARG OPEN_JDK_VERSION=11
 ARG PYTHON=python3
 ARG POSTGRESQL=postgresql-42.3.6
+ARG SPARK_PACKAGE=spark-3.2.1/spark-3.2.1-bin-hadoop3.2.tgz
+ARG PYSPARK_PACKAGE=pyspark==3.2.1
+ARG PSYCOPG2_PACKAGE=psycopg2-binary
+ARG PANDAS_PACKAGE=pandas==1.4.2
 
 # Install OpenJDK 
 RUN \
@@ -22,12 +26,19 @@ RUN \
 	${PYTHON}-pip ${PYTHON}-virtualenv && \
 	rm -rf /var/lib/apt/lists/* 
 
-# Install PySpark and NumPy 
+# Install PySpark
+RUN \
+	wget "https://www.apache.org/dyn/closer.lua/spark/${SPARK_PACKAGE}?action=download" -O - | tar -xzC /tmp; \
+	archive=$(basename "${SPARK_PACKAGE}") bash -c "mv -v /tmp/\${archive/%.tgz/} /spark"; 
+
+RUN \
+	pip install --no-cache-dir ${PYSPARK_PACKAGE};
+
+# Install PostgreSQL Python's API 
 RUN \
 	${PYTHON} -m pip install --upgrade pip && \
-	${PYTHON} -m pip install numpy psycopg2-binary pandas && \
-	${PYTHON} -m pip install pyspark 
- 
+	${PYTHON} -m pip install ${PSYCOPG2_PACKAGE} ${PANDAS_PACKAGE}  
+
 # Capture JDBC driver 
 RUN wget https://jdbc.postgresql.org/download/${POSTGRESQL}.jar
 
