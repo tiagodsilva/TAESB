@@ -61,10 +61,19 @@
 
 	\noindent Neste sentido, escolhemos o mecanismo de comunicação por mensagens persistentes publish-subscribe para o gerenciamento da comunicação entre os nós de processmaneto. Utilizamos, para isso, a biblioteca \texttt{Celery}, em \texttt{Python}, que providencia uma implementação eficiente deste mecanismo. Precisávamos, assim, de um broker para garantir a integração consistente de múltiplas máquninas em um sistema distribuído; escolhemos, portanto, a implementação do \texttt{RabbitMQ} por sua popularidade\footnote{Serviços populares, com uma comunidade mais extensa, permitem que usuários possam instanciar uma rede de apoio mútuo que incrementa a eficiência do desenvolvimento de \textit{software}.} e por sua acessibilidade em servições de computação em nuvem, como a AWS (AmazonMQ; veja a Seção~\ref{sec:mq}). 
 
+	
+	Nas seções seguintes, desta maneira, descreveremos os procedimentos utilizados para extração dos dados da simulação, sua subsequente transformação em um formato compatível com um banco de dados relacional, e seu carregamento em tabelas. Conforme enfatizamos na Seção~\ref{sec:rds}, utilizamos o serviço RDS da AWS para a implementação do banco de dados, que é escalável e contempla as operações do PostgreSQL, com uma interface adequada em \texttt{Python}. 
 
 \subsection{Extração}
+
+Logo, com o objetivo de descrever a extração dos dados gerados pelos clientes, encetamos com uma descrição de seu funcionamento. Explicitamente, implementamos uma simulação de um sistema emergente, em que formigas de distintos formigueiros interagem com um mapa finito para capturar alimentos e os conduzir a seus depósitos. Cada simulação, neste caso, é caracterizada por um conjunto de informações, como a quantidade de formigas e a extensão da execução, que precisamos extrair e direcionar a um consumidor que as alocará em uma base de dados. A etapa de extração, deste modo, consistiu na aplicação de procedimentos que garantissem a consistência entre as implementações dos mecanismos de comunicação utilizados, o \texttt{Celery}, e os processos de geração de dados de nossa implementação. Especificamente, serializamos os atributos das classes subjacentes à simulação e utilizamos o mecanismo de comunicação para transferir os dados do JSON culminante para o servidor, em que, conforme descrevemos na seção seguinte, eles são transformados em um formato cartesiano. 
+
 \subsection{Transformação}
+
+Nestas veredas, a etapa de transformação está amarrada à captura das mensagens empilhadas no broker e seu subsequente processamento, com a modificação de um JSON não estruturado para enformar instâncias compatíveis com o modelo relacional da Figura~\ref{fig:relational}. Dicotomicamente, este procedimento é computacionalmente enxuto, na medida em que ele é equivalente à remodelação do formato de uma JSON, e, em contraste, ele é volumoso: em cada iteração da simulação, delineada como um momento em que todas as formigas executaram suas ações, os clientes se comunicam com o broker, e o intervalo entre mensagens sequentes está na ordem de milissegundos. Importantemente, esta verificação estende nossas motivações para a escolha de um mecanismo de comunicação assíncrono e orientado a mensagens persistentes, como o publish-subscribe. 
+
 \subsection{Carregamento}
+
 
 \section{Armazenamento em nuvem (AWS)}
     O processamento e o armazenamento locais podem ser vantajosos por ter uma velocidade alta e não depender de conexões externas. No entanto, essas vantagens podem acabar rapidamente ao passo que a quantidade a ser processada/armazenada começa a aumentar. Nesse sentido, uma das alternativas mais adotadas atualmente é a de computação em nuvem, onde um ambiente vasto com soluções prontas ou customizáveis são disponibilizadas e de forma escalável, de acordo com a demanda.
@@ -113,7 +122,7 @@
     
     
 
-\subsection{RDS}
+\subsection{RDS} \label{sec:rds} 
     
     
 \subsection{ECR}

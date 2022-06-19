@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.8.30)  19 JUN 2022 14:32
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.8.30)  19 JUN 2022 15:14
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -732,78 +732,4 @@ LaTeX Info: Redefining \nameref on input line 23.
 
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: listings package is loaded.
-Package caption Info: End \AtBeginDocument code.
-\c@lstlisting=\count372
-LaTeX Font Info:    Trying to load font information for U+msa on input line 23.
- (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
-File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-)
-LaTeX Font Info:    Trying to load font information for U+msb on input line 23.
- (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
-File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [1
-
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (./report.toc)
-\tf@toc=\write4
-\openout4 = `report.toc'.
-
- [2]
-<../images/relational_diagram.png, id=75, 2814.515pt x 2160.07pt>
-File: ../images/relational_diagram.png Graphic file (type png)
-<use ../images/relational_diagram.png>
-Package pdftex.def Info: ../images/relational_diagram.png  used on input line 38.
-(pdftex.def)             Requested size: 418.25368pt x 320.99716pt.
- [3 <../images/relational_diagram.png>]
-LaTeX Font Info:    Trying to load font information for T1+pcr on input line 45.
- (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
-File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
-) [4] [5]
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 83.
- (/usr/share/texmf/tex/latex/lm/t1lmtt.fd
-File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
-Overfull \hbox (0.81627pt too wide) in paragraph at lines 95--95
-\T1/lmtt/m/n/12 :broker:TJG:b-7182fca9-4c07-4bfa-b 
- []
-
-
-Overfull \hbox (83.20692pt too wide) in paragraph at lines 93--98
- [][] 
- []
-
-[6]
-Overfull \hbox (33.575pt too wide) in paragraph at lines 126--131
- [][] 
- []
-
-
-Overfull \hbox (4.75757pt too wide) in paragraph at lines 139--143
- [][] 
- []
-
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 152.
-[7]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 152.
- (./report.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 152.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 152.
-Package rerunfilecheck Info: File `report.out' has not changed.
-(rerunfilecheck)             Checksum: B03CFACC787C290416A2A186B354D39A;627.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 152.
- ) 
-Here is how much of TeX's memory you used:
- 17566 strings out of 481239
- 295507 string characters out of 5920377
- 792627 words of memory out of 5000000
- 32449 multiletter control sequences out of 15000+600000
- 553412 words of font info for 81 fonts, out of 8000000 for 9000
- 1141 hyphenation exceptions out of 8191
- 63i,14n,100p,1179b,751s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texmf/fonts/type1/public/lm/lmtt12.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1728.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfcc1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0700.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfxc1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfxc1440.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on report.pdf (7 pages, 567563 bytes).
-PDF statistics:
- 187 PDF objects out of 1000 (max. 8388607)
- 160 compressed objects within 2 object streams
- 34 named destinations out of 1000 (max. 500000)
- 94 words of extra memory for PDF output out of 10000 (max. 10000000)
-
+Package caption Info: End
