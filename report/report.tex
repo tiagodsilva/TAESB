@@ -76,6 +76,12 @@ Nestas veredas, a etapa de transformação está amarrada à captura das mensage
 
 Enfaticamente, portanto, os dados transformados estavam receptivos ao seu carregamento na base de dados; executamos, para isso, as operações de inserção e de atualização propiciadas pelo sistema de gerenciamento de banco de dados utilizado, PostgreSQL, e sua interface em \texttt{Python}, \texttt{psycopg2} (versão 2.9.3). Crucialmente, a eficiência deste estágio está correlacionada aos protolocos de comunicação utilizados pela rede subjacente; em nossos experimentos, contudo, este aspecto não consistia em um gargalo computacional. 
 
+\section{Processamento em Paralelo} 
+
+Em conjunto com uma pipeline ETL, implementamos procedimentos para processar os dados, computando as 14 quantidades solicitadas nos requerimentos. Com o objetivo de garantir escalabilidade e transparência, escolhemos o \texttt{Spark}, e \texttt{PySpark}, para executar esta tarefa. Em maior detalhe, o \texttt{PySpark} atua independentemente do \texttt{Celery}, capturando periodicamente os dados disponíveis na base de dados e executando algoritmos para computar as quantidades sumárias; inconvenientemente, os estágios de IO, em que os dados são lidos e, em seguida ao processamento, escritos na base de dados, concentram o maior consumo temporal. 
+
+No entanto, em oposição a uma pipeline ETL, escolhemos não introduzir o \texttt{PySpark} em um servidor na nuvem da AWS operando continuamente (veja a seção seguinte). Com efeito, objetivamente, existem restrições pecuniárias no consumo do serviços da AWS que controlam a disponibilidade do que podemos inserir nesta plataforma\footnote{Por experimentação, nós instanciamos um cluster no AWS EMR; contudo, nós o encerramos para garantir a persistência do serviço para outros usuários.}. Mais subjetivamente, o \texttt{PySpark} foi desenhado para o processamento de volumes expandidos de dados; contrastivamente, nossas tabelas contemplam milhares de instâncias.   
+
 \section{Armazenamento em nuvem (AWS)}
     O processamento e o armazenamento locais podem ser vantajosos por ter uma velocidade alta e não depender de conexões externas. No entanto, essas vantagens podem acabar rapidamente ao passo que a quantidade a ser processada/armazenada começa a aumentar. Nesse sentido, uma das alternativas mais adotadas atualmente é a de computação em nuvem, onde um ambiente vasto com soluções prontas ou customizáveis são disponibilizadas e de forma escalável, de acordo com a demanda.
     

@@ -4,9 +4,10 @@
 \contentsline {subsection}{\numberline {2.1}Extração}{6}{subsection.2.1}%
 \contentsline {subsection}{\numberline {2.2}Transformação}{6}{subsection.2.2}%
 \contentsline {subsection}{\numberline {2.3}Carregamento}{6}{subsection.2.3}%
-\contentsline {section}{\numberline {3}Armazenamento em nuvem (AWS)}{7}{section.3}%
-\contentsline {subsection}{\numberline {3.1}AmazonMQ}{7}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}RDS}{8}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}ECR}{8}{subsection.3.3}%
-\contentsline {subsection}{\numberline {3.4}ECS}{8}{subsection.3.4}%
-\contentsline {section}{\numberline {4}Interface com o usuário}{8}{section.4}%
+\contentsline {section}{\numberline {3}Processamento em Paralelo}{7}{section.3}%
+\contentsline {section}{\numberline {4}Armazenamento em nuvem (AWS)}{7}{section.4}%
+\contentsline {subsection}{\numberline {4.1}AmazonMQ}{8}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}RDS}{8}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}ECR}{8}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}ECS}{8}{subsection.4.4}%
+\contentsline {section}{\numberline {5}Interface com o usuário}{9}{section.5}%
