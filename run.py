@@ -15,7 +15,8 @@ import argparse
 FOODS = 99 
 INSTANCES = 3 
 
-def run(n_instances: int, max_foods: int=FOODS): 
+def run(n_instances: int, max_foods: int=FOODS, 
+        compute_benchmarks: bool=False): 
     """ 
     Execute `n_instances` instances, each with a criterion equal 
     to `max_foods` foods for winning the simulation. 
@@ -25,6 +26,11 @@ def run(n_instances: int, max_foods: int=FOODS):
     while curr_instance < n_instances: 
         cmd = "python main.py --max_foods {max_foods}".format( 
                 max_foods=max_foods) 
+
+        # Check if we should compute benchmarks 
+        if compute_benchmarks: 
+            cmd += " --benchmarks" 
+
         subprocess.Popen(cmd, shell=True) 
         curr_instance += 1 
 
@@ -38,7 +44,9 @@ def parse_args(parser: argparse.ArgumentParser):
     parser.add_argument("--foods", 
             help="Criterion for winning the simulation", 
             type=int, default=FOODS) 
-    
+    parser.add_argument("--benchmarks", 
+            help="Whether to compute benchmarks for the ETL pipeline.", 
+            action="store_true") 
     # Parse the parameters 
     args = parser.parse_args() 
 
@@ -54,7 +62,7 @@ def main(msg: str=None):
     ) 
     args = parse_args(parser) 
     # Apply the simulations 
-    run(args.instances, args.foods)  
+    run(args.instances, args.foods, args.benchmarks)  
 
     if msg: 
         print(msg) 

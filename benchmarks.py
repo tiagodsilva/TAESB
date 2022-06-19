@@ -29,12 +29,26 @@ def pipeline_time(table_name: str="benchmarks"):
             .groupBy("scenario_id") \
             .agg(
                     (F.max("computed_at").cast("long") - F.min("computed_at").cast("long")) \
-                            .alias("execution_time")) \
-            .toPandas()  
+                            .alias("execution_time")) 
     
     # Return the temporal execution range for each scenario 
     return ranges 
    
+def generate_lineplots(ranges: pyspark.sql.DataFrame): 
+    """ 
+    Generate the lineplots for distinct quantity of processes. 
+    """ 
+    # Compute the average execution time for each process 
+    execution_time = ranges \
+            .groupBy("n_processes") \
+            .agg(F.mean("execution_time").alias("execution_time")) \
+            .toPandas() 
+
+    # Write the visualizatiosn 
+    line_plot(data=execution_time, 
+            x="n_processes", 
+            y="execution_time") 
+
 if __name__ == "__main__": 
     ranges = pipeline_time(table_name="benchmarks") 
     print(ranges) 

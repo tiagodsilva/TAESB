@@ -12,15 +12,10 @@ MAINTAINER My, Myself and I
 RUN apt-get -yqq update 
 RUN apt-get -yqq install python3-pip python3-dev 
 RUN apt-get -yqq install wget unzip
-RUN mkdir /TAESB
+RUN mkdir -p /TAESB
 # Clone the repository 
-RUN wget https://osf.io/kqevn/download -O /TAESB/taesb.zip
-RUN cd TAESB && unzip taesb.zip 
+ADD . /TAESB/
 WORKDIR /TAESB
-
-# Expose the environment variables for Celery and PostgreSQL
-# It is not persistent across images
-RUN bash /TAESB/taesb/config.sh
 
 # Fetch apps 
 RUN pip install celery==${CELERY_PACKAGE} \
