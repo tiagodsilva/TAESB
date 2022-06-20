@@ -178,4 +178,6 @@ docker run --tty taesbs-spark
  
 to start processing the data in the database. These steps combine and characterize our system, which alloes the distributed processing of data with appropriate and transparent communication mechanisms.    
 
+# Wiki 
 
+TAESB stands for The Ants' Empire Strikes Back; it is a pointer to George Lucas' movies. 
