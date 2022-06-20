@@ -7,7 +7,7 @@ from celery.schedules import crontab
 
 from ..utils import CallbacksList 
 from ..utils.DatabaseTask import DatabaseTask
-from ..utils.BenchmarkTask import BenchmarkTask 
+
 # Database 
 import psycopg2 
 
@@ -21,8 +21,6 @@ import time
 
 # Docs 
 from typing import Dict 
-
-DEBUG = True 
 
 @app.task(base=DatabaseTask, bind=True, priority=9) 
 def initialize_database(self, global_map: Dict): 
@@ -95,7 +93,7 @@ def shutdown_db(self):
     """ 
     self.db_conn.close() 
 
-@app.task(base=BenchmarkTask, bind=True, priority=9) 
+@app.task(base=DatabaseTask, bind=True, priority=9) 
 def benchmark(self, global_map: Dict): 
     """ 
     Compute the execution time for this pipeline. 
