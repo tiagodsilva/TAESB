@@ -1,5 +1,8 @@
 """ 
 Query the database. 
+
+Use: 
+    python query.py --query [QUERY] 
 """ 
 # Import the application 
 import taesb 
