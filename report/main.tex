@@ -88,7 +88,7 @@ No entanto, em oposição a uma pipeline ETL, escolhemos não introduzir o \text
     
     Dito isso, para esse trabalho utilizamos alguns dos serviços de nuvem da Amazon Web Services, a fim de agregar mais robustez ao nosso pipeline de dados. Assim, veremos agora quais recursos foram utilizados e informações das instâncias criadas em cada um deles.
 
-\subsection{AmazonMQ}
+\subsection{AmazonMQ} \label{sec:mq} 
     Uma vez que utilizamos o RabbitMQ como broker, temos o AmazonMQ como serviço de gerenciamento de mensagens na AWS para criar uma instância com o RabbitMQ.
     
     Ao instanciar com as opções devidamente escolhidas, ficamos com as seguintes informações (Tabela~\ref{tab:amazonmq}).
@@ -128,9 +128,7 @@ No entanto, em oposição a uma pipeline ETL, escolhemos não introduzir o \text
     \end{table}
    
     
-    
-
-\subsection{RDS}
+\subsection{RDS} \label{sec:rds} 
     O Amazon RDS (\textit{Relational Database Service}) é uma coleção de serviços gerenciados que facilita a configuração, operação e escalabilidade de bancos de dados na nuvem. A partir dele, é possível operar dentre diversos mecanismos, como MySQL, PostgreSQL, MariaDB, SQL Server e etc.
     
     No nosso caso, para utilização do banco de dados relacional, uma instância de PostgreSQL foi iniciada na Amazon RDS. Desse modo, falaremos aqui de suas especificações e deixaremos as credenciais de acesso.
@@ -247,7 +245,7 @@ Além disso, desenhamos um par de interfaces para o usuário interagir com o nos
 A interação gráfica, contudo, é mais direcionada aos objetivos elicitados a priori da modelagem do sistema. Na Figura [figura], factualmente, expomos as quantidades globais, que consolidam todos os cenários, em uma tabela; também pertimos, alternativamente, a escolha de um cenário e o acompanhamento de suas informações específicas e de seus formigueiros (inserimos, para isso, um gráfico de barras para enfatizar a discrepância entre os depósitos de comidas). Com o objetivo de a iniciar, execute, no diretório raiz da aplicação, 
 
 \begin{lstlisting} 
-	python spark_dash.py    
+	python app.py    
 \end{lstlisting} 
 
 \noindent e direcione seu navegador no sítio impresso na tela. Com ênfase, perecba que existe um par de dissonâncias entre os cenários atuais e as tabelas: por um lado, o processamento independente pelo \texttt{Spark} suscita uma discrepância temporal entre as informações na base de dados e as informações factuais; por outro, a interface gráfica também goza de uma taxa de atualização que expande a distinção entre a realidade e os registros.  
@@ -291,5 +289,12 @@ Nesta seção, mensuramos o tempo de execução da pipeline ETL para distintas q
 
 Crucialmente, o incremento da quantidade de instâncias no cluster não consiste de uma escolha uniformemente adequada; a priori, com efeito, poderíamos acreditar que, para uma quantidade arbitrariamente grande de nós de computação, poderíamos gozar de um tempo de processamento arbitrariamente enxuto. No entanto, as adições marginais de eficiência computacional são \textit{decrescentes}; possivelmente, essa verificação está amarrada à existência de custos fixos de comunicação e e de transferência de informações e, também, ao controle de acesso concorrente pelo sistema de gerenciamento de banco de dados que são incólumes, em alguma extensão, à quantidade de instâncias participando da pipeline. Em nosso cenário, particularmente, o volume de dados é enxuto; o custo variável, amarrado à transformação das informações, é, acreditamos, eclipsado pelos mecanismos subjacentes ao sistema distribuído; isso é, aliás, bastante enfático na implementação do Spark. Mais geralmente, o desenho de sistemas distribuídos exige uma escolha cautelosa entre taxa de processamento e custo; clusters tremendamente expansivos não conforma, em geral, a escolha mais apropriada. 
 
+Cotejamos, ainda, os tempos de execução, mensurados com a mesma métrica, em quantidades variáveis de processos executados em uma mesma máquina; consolidamos, na Figura [figura], nossas verificações. Como no processamento em múltiplas máquninas, não conforma, em geral, uma estratégia estritamente dominante a escolha de uma quantidade arbitrariamente larga de máquinas; nesta figura, escolhemos cinco cenários para serem executados, o que mitiga, com respeito aos dados da Tabela~\ref{tab:benchmarks}, o volume de informações que precisa ser processado. Em condições reais, existem serviços (inclusive, o ECS AWS) que permitem a utilização de uma quantidade adaptiva de instãncias executando alguma tarefa; assim, garantimos, por exemplo, que o sistema é simultaneamente não dispendioso e estável a picos de acessos abruptos. 
 
+\begin{figure} 
+	\centering 
+	\includegraphics[scale=.9]{../benchmarks/benchmarksprocesses.png} 
+	\caption{Tempos de execução da pipeline ETL para quantidades distintas de processos em uma mesma máquina.} 
+	\label{fig:local} 
+\end{figure} 
 \end{document}

@@ -1,5 +1,6 @@
 # Fdb version 3
-["pdflatex"] 1655686192 "main.tex" "main.pdf" "main" 1655686193
+["pdflatex"] 1655687876 "main.tex" "main.pdf" "main" 1655687878
+  "../benchmarks/benchmarksprocesses.png" 1655687280 25694 995befc8b9110f4ad1d87cb9c4fe4b4c ""
   "/etc/texmf/web2c/texmf.cnf" 1630360922 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -179,16 +180,18 @@
   "images/postgres_connection.png" 1655692434 118027 3f196cfa6a9fb5ef82cab0e1a8342ade ""
   "images/relational_diagram.png" 1655692434 521156 7167711b058d17cd2f2cc9369b63c420 ""
   "images/scenarios_paint.png" 1655692434 622072 76f25dc7fbc3f85239fb439a94a91327 ""
-  "main.aux" 1655686193 6955 b8c0c2cd638ef0a0ccd96b2a2623035e "pdflatex"
-  "main.out" 1655686193 735 6830d205c1bbad30a07dfb9ae1a1700d "pdflatex"
-  "main.tex" 1655686191 27330 c1c804526ef18542ebb45ca47f78dfc7 ""
-  "main.toc" 1655686193 986 5267474b522202ab8932b7170a9dcdf4 "pdflatex"
+  "logo/FGV-EMAp.png" 1655692434 10348 0e863494026cb5e9841d4aea5f579c2f ""
+  "logo/FGV-Logo.png" 1655692434 21025 6c6f4ad8bdc6d41f54a0d68bf98d6613 ""
+  "main.aux" 1655687877 7449 674a2fd19d2a320b150a539034f012fa "pdflatex"
+  "main.out" 1655687877 735 6830d205c1bbad30a07dfb9ae1a1700d "pdflatex"
+  "main.tex" 1655687875 28170 2517417666e9834842ba16c099a4b3e0 ""
+  "main.toc" 1655687877 986 5267474b522202ab8932b7170a9dcdf4 "pdflatex"
   "settings/listings.tex" 1655692434 2060 f790ed3c93a34ef80abdaa4fee28d956 ""
   "settings/listings_scilab.tex" 1655692434 4282 561db411c8a484ca52601aed1abc43ff ""
-  "settings/preambule.sty" 1655692434 3578 877dde60d876b21660e8d38def5e7b64 ""
+  "settings/preamble.sty" 1655686252 3574 f32c8efd307564044709237fcd7b3078 ""
   (generated)
   "main.aux"
-  "main.pdf"
   "main.toc"
-  "main.log"
+  "main.pdf"
   "main.out"
+  "main.log"
