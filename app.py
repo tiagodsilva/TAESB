@@ -1,5 +1,5 @@
 """ 
-Implements the Dash web interface. 
+Implements the Dash web interface for interaction with the relational database. 
 """ 
 # sys
 import dash
@@ -10,7 +10,7 @@ import pandas as pd
 import taesb 
 
 import os
-import plotly.graph_objs as go
+# Visualization 
 import plotly.express as px 
 
 import psycopg2 
