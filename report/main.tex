@@ -282,13 +282,13 @@ Nesta seção, mensuramos o tempo de execução da pipeline ETL para distintas q
 		1 & 25.22 \\ 
 		3 & 15.86 \\ 
 		5 & 14.98 \\ 
-		7 & 20.44 \\ 
+		7 & 14.44 \\ 
 		\hline 
 	\end{tabular}
-	\caption{Benchmarks para o pipeline ETL distribuído; perceba que incrementar a quantidade de instâncias não é, objetivamente, uma estratégia dominante, conforme a métrica utilizada.} 
+	\caption{Benchmarks para o pipeline ETL distribuído; perceba que incrementar a quantidade de instâncias não é, objetivamente, uma estratégia estritamente dominante, conforme a métrica utilizada.} 
 	\label{tab:benchmarks} 
 \end{table} 
 
-Crucialmente, incrementar a quantidade de instâncias no cluster não consiste de uma escolha uniformemente ótima; a priori, com efeito, poderíamos acreditar que, para uma quantidade arbitrariamente grande de nós de computação, poderíamos gozar de um tempo de processamento arbitrariamente enxuto. 
+Crucialmente, incrementar a quantidade de instâncias no cluster não consiste de uma escolha uniformemente adequada; a priori, com efeito, poderíamos acreditar que, para uma quantidade arbitrariamente grande de nós de computação, poderíamos gozar de um tempo de processamento arbitrariamente enxuto. No entanto, as adições marginais de eficiência computacional são \textit{decrescentes}; possivelmente, essa verificação está amarrada à existência de custos fixos de comunicação e e de transferência de informações e, também, ao controle de acesso concorrente pelo sistema de gerenciamento de banco de dados que são incólumes, em alguma extensão, à quantidade de nós de computação escolhidos. 
 
 \end{document}
