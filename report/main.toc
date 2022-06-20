@@ -11,4 +11,5 @@
 \contentsline {subsection}{\numberline {4.3}ECR}{10}{subsection.4.3}%
 \contentsline {subsection}{\numberline {4.4}ECS}{10}{subsection.4.4}%
 \contentsline {section}{\numberline {5}Interface com o usuário}{11}{section.5}%
+\contentsline {section}{\numberline {6}Conclusões}{13}{section.6}%
 \contentsline {section}{\numberline {A}Benchmarks}{13}{appendix.A}%
