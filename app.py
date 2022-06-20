@@ -46,7 +46,7 @@ plot_1 = html.Div(className="first-plot",
     ])
 
 # Here we are creating the second 'plot', which will be located at right
-# TODO: create the second visualization :)
+# This creates the second visualization :)
 plot_2 = html.Div(className='second-plot',
         children=[ 
             html.Img(src = "https://i.pinimg.com/originals/1b/66/69/1b66698ba3bf0ec241c236b4df00503a.png", id="antImg"), 
