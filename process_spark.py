@@ -6,7 +6,7 @@ import taesb
 from taesb.spark.SparkSubmit import ScheduleSpark 
 
 # Interval between subsequent processing (in seconds) 
-INTERVAL = 25 
+INTERVAL = 9
 
 if __name__ == "__main__": 
     spark = ScheduleSpark(app_name="taesb") 
