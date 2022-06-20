@@ -83,7 +83,7 @@ at the root directory of this repository to start posting the messages to the br
 python main.py 
 ``` 
 
-to start a producer. If you want to start multiple scenarios, execute 
+(check `python main.py --help` for the available parameters) to start a producer. If you want to start multiple scenarios, execute 
 
 ``` 
 python run.py --instances N 
