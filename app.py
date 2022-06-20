@@ -1,3 +1,6 @@
+""" 
+Implements the Dash web interface. 
+""" 
 # sys
 import dash
 from dash import dcc, html, dash_table 
