@@ -86,8 +86,35 @@ with the format x[int],y[int],volume[int];...;x[int],y[int],volume[int].",
             type=int, default=config.MAX_FOODS) 
     parser.add_argument("--benchmarks", help="Whether to benchmark the pipeline.", 
             action="store_true") 
+    parser.add_argument("--random", 
+        help="Initialize a map in which the anthills and the foods enjoy random parameters. Overwrite the other attributes.", 
+        action="store_true") 
 
     return parser.parse_args() 
+
+def initialize_random(args): 
+    """ 
+    Initialize randomly the simulation's parameters. 
+    """ 
+    # Map's dimensions 
+    args.width = np.random.poisson(size=1) + args.width 
+    args.height = np.random.poisson(size=1) + args.height) 
+
+    # Update the initial volume of the foods 
+    for i, food in enumerate(args.foods): 
+        # Use a Poisson distribution 
+        args.foods[2] = np.random.poisson(lam=9, size=1) + 1 
+    
+    # Update the quantity of ants 
+    for i, anthills in enumerate(args.anthills): 
+        # Use a Poisson distribution 
+        args.anthills[3] = np.random.poisson(lam=19, size=1) + 1 
+
+    # Update the ants' field of view 
+    args.ants_fov = np.random.poisson(lam=1e-1, size=1) + 1
+
+    # Return the random parameters 
+    return args 
 
 def main(args): 
     """ 
@@ -97,12 +124,15 @@ def main(args):
 
     if args.benchmarks: 
         callbacks += [tasks.benchmark] 
+    
+    if args.random: 
+        args = initialize_random(args)  
 
     callbacks = taesb.CallbacksList( 
           initialize=tasks.initialize_database,      
           callbacks=callbacks 
     ) 
-
+    
     # Instantiate a map 
     world = taesb.Map( 
             width=args.width, 

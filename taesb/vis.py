@@ -18,6 +18,8 @@ sns.set_theme(style="whitegrid", palette="pastel")
 def line_plot(data: List[Dict], 
         x: str, 
         y: str, 
+        x_label: str, 
+        y_label: str, 
         filename: str=None): 
     """ 
     Draw a line plot and write it to the file `filename`. 
@@ -27,6 +29,10 @@ def line_plot(data: List[Dict],
 
     # and draw a figure 
     sns.lineplot(x=x, y=y, data=dataframe) 
+
+    # Write visualization's labels
+    plt.xlabel(x_label) 
+    plt.ylabel(y_label) 
 
     if filename: 
         plt.savefig(filename) 

@@ -57,6 +57,8 @@ def generate_lineplots(ranges: pyspark.sql.DataFrame,
     line_plot(data=execution_time, 
             x="n_processes", 
             y="execution_time", 
+            x_label="Quantidade de processos", 
+            y_label="Tempo de execução", 
             filename=figure_filename) 
 
 if __name__ == "__main__": 
