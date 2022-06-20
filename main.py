@@ -28,7 +28,7 @@ def anthills(s: str):
         # Convert csv to a list of tuples 
         s = [tuple(csv.split(",")) for csv in csvs] 
         # and use an appropriate type 
-        s = [(str(name), int(x), int(y), int(ants)) for name, x, y, ants in \
+        s = [[str(name), int(x), int(y), int(ants)] for name, x, y, ants in \
                 s] 
 
         return s 
@@ -53,7 +53,7 @@ def foods(s: str):
         s = [tuple(csv.split(",")) for csv in csvs] 
 
         # Cast the parameters 
-        s = [(int(x), int(y), int(volume)) for x, y, volume in s] 
+        s = [[int(x), int(y), int(volume)] for x, y, volume in s] 
 
         return s 
     except: 
@@ -97,21 +97,21 @@ def initialize_random(args):
     Initialize randomly the simulation's parameters. 
     """ 
     # Map's dimensions 
-    args.width = np.random.poisson(size=1) + args.width 
-    args.height = np.random.poisson(size=1) + args.height) 
+    args.width = int(np.random.poisson(size=1) + args.width) 
+    args.height = int(np.random.poisson(size=1) + args.height) 
 
     # Update the initial volume of the foods 
     for i, food in enumerate(args.foods): 
         # Use a Poisson distribution 
-        args.foods[2] = np.random.poisson(lam=9, size=1) + 1 
+        args.foods[i][2] = int(np.random.poisson(lam=9, size=1) + 1) 
     
     # Update the quantity of ants 
     for i, anthills in enumerate(args.anthills): 
         # Use a Poisson distribution 
-        args.anthills[3] = np.random.poisson(lam=19, size=1) + 1 
+        args.anthills[i][3] = int(np.random.poisson(lam=19, size=1) + 1) 
 
     # Update the ants' field of view 
-    args.ants_fov = np.random.poisson(lam=1e-1, size=1) + 1
+    args.ants_fov = int(np.random.poisson(lam=1e-1, size=1) + 1) 
 
     # Return the random parameters 
     return args 
